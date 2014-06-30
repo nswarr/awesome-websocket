@@ -1,0 +1,21 @@
+{
+  "name": "reconnecting-websocket",
+  "version": "0.0.1",
+  "description": "A handy helper that replaces the existing WebSocket object with one that looks quite a bit similar, yet reconnects.  In the event of there being no WebSocket, one is provided fo r you via 'ws'.",
+  "main": "index.js",
+  "scripts": {
+    "test": "browserify index.js --outfile test/www/js/reconn.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "0.4.31"
+  },
+  "devDependencies": {
+    "express": "^4.4.5",
+    "express-logger": "0.0.3",
+    "body-parser": "^1.4.3",
+    "errorhandler": "^1.1.1",
+    "browserify": "^4.2.0"
+  }
+}
