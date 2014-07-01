@@ -136,7 +136,6 @@ function ReconnectingResendingWebSocket(url){
   this.ondatanotsent = ondatanotsent;
   this.onreconnect = onreconnect
   this.send = function()  {
-    console.log("this is overridden");
     if ( onreconnect != this.onreconnect || ondatanotsent != this.ondatanotsent ){
       log.error("onreconnect or ondatanotsent have been reassigned, this could break resending!");
     }
