@@ -799,13 +799,21 @@ if (WebSocket) ws.prototype = WebSocket.prototype;
 (function (global){
 log = require('simplog');
 
+// we may replace the 'native' websocket, so we'll be keeping track of the 
+// original so we can reference it or put it back if asked
 var OriginalWebSocket = null;
 if ( typeof(WebSocket) === "undefined" ){
+  // as a convenience we'll provide a WebSocket implementation if
+  // one isn't available, thus this will work in nodejs
   OriginalWebSocket = require("ws");
 } else {
   OriginalWebSocket = WebSocket;
 }
 
+/* This is the function that our implementations will use to send
+ * it's out here because we want to use it differently in the various
+ * implementations
+ */
 function sender(data){
   // if the socket isn't open, we'll just reconnect and let the
   // caller try again cause we know this raises an uncatchable
