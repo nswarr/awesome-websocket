@@ -11,9 +11,9 @@ function sender(data){
   // if the socket isn't open, we'll just reconnect and let the
   // caller try again cause we know this raises an uncatchable
   // error
-  if (underlyingWs.readyState != OriginalWebSocket.OPEN){
-    log.info("underlyingWs not open, reconnecting");
-    reconnect();
+  if (this.underlyingWs.readyState != OriginalWebSocket.OPEN){
+    log.info("this.underlyingWs not open, reconnecting");
+    this.reconnect();
     this.ondatanotsent(data);
   } else {
     // otherwise we try to send, and if we have a failure
@@ -21,10 +21,10 @@ function sender(data){
     // all about how we failed via onsendfailed
     try {
       log.info("sending: ", data);
-      underlyingWs.send(data);
+      this.underlyingWs.send(data);
     } catch (error) {
-      log.error("error during send on underlyingWs", e);
-      reconnect();
+      log.error("error during send on this.underlyingWs", e);
+      this.reconnect();
       this.ondatanotsent(data);
     }
   }
@@ -39,7 +39,7 @@ function ReconnectingWebSocket(url, protocols){
   this.onclose   = function () {};
   this.onmessage = function () {};
 
-  var underlyingWs        = null;
+  this.underlyingWs        = null;
   var reconnectOnClose    = true;
   var reconnectAttempts   = 0;
   var readyState         = -1;
@@ -51,7 +51,7 @@ function ReconnectingWebSocket(url, protocols){
     log.info("reconnecting");
     if ( readyState === OriginalWebSocket.CONNECTING ||
          readyState === RECONNECTING || 
-         underlyingWs.readyState === OriginalWebSocket.CONNECTING )
+         this.underlyingWs.readyState === OriginalWebSocket.CONNECTING )
     {
       return;
     }
@@ -61,22 +61,22 @@ function ReconnectingWebSocket(url, protocols){
     setTimeout(connect, delay);
   }
   // make it 'public' too
-  this.reconnect = reconnect;
+  this.reconnect = reconnect.bind(this);
 
   var connect = function() {
     readyState = OriginalWebSocket.CONNECTING;
     // an attempt to avoid get extraneous events
     // and allow the old socket to be GCd
-    if ( underlyingWs !== null ){
-      underlyingWs.onerror = null;
-      underlyingWs.onmessage = null;
-      underlyingWs.onclose = null;
+    if ( this.underlyingWs !== null ){
+      this.underlyingWs.onerror = null;
+      this.underlyingWs.onmessage = null;
+      this.underlyingWs.onclose = null;
       // we don't need to do anything with onopen because it wouldn't
       // fire again anyway, and shouldn't keep the socket from getting
       // GCd
     }
-    underlyingWs = new OriginalWebSocket(url, protocols || []);
-    underlyingWs.onopen  = function(evt){
+    this.underlyingWs = new OriginalWebSocket(url, protocols || []);
+    this.underlyingWs.onopen  = function(evt){
       readyState = OriginalWebSocket.OPEN;
       if ( reconnectAttempts === 0 ) {
         this.onopen(evt);
@@ -88,51 +88,30 @@ function ReconnectingWebSocket(url, protocols){
 
     // onclose, unless told to close by having our close() method called
     // we'll ignore the close, and reconnect
-    underlyingWs.onclose = function(evt){
+    this.underlyingWs.onclose = function(evt){
       readyState = OriginalWebSocket.CLOSED;
       if (reconnectOnClose){
-        reconnect();
+        this.reconnect();
       } else {
         this.onclose(evt);
       }
     }.bind(this);
 
-    underlyingWs.onerror = function(evt) {
+    this.underlyingWs.onerror = function(evt) {
       readyState = ERRORED;
       this.onerror(evt);
     }.bind(this);
 
-    underlyingWs.onmessage = function(evt) {
+    this.underlyingWs.onmessage = function(evt) {
       this.onmessage(evt);
     }.bind(this);
   }.bind(this);
 
-  this.send = function (data){
-    // if the socket isn't open, we'll just reconnect and let the
-    // caller try again cause we know this raises an uncatchable
-    // error
-    if (underlyingWs.readyState != OriginalWebSocket.OPEN){
-      log.info("underlyingWs not open, reconnecting");
-      reconnect();
-      this.ondatanotsent(data);
-    } else {
-      // otherwise we try to send, and if we have a failure
-      // we'll go ahead and reconnect, telling our caller
-      // all about how we failed via onsendfailed
-      try {
-        log.info("sending: ", data);
-        underlyingWs.send(data);
-      } catch (error) {
-        log.error("error during send on underlyingWs", e);
-        reconnect();
-        this.ondatanotsent(data);
-      }
-    }
-  }.bind(this);
+  this.send = sender.bind(this);
 
   this.close = function () {
     reconnectOnClose = false;
-    underlyingWs.close();
+    this.underlyingWs.close();
   }.bind(this);
 
   setTimeout(connect, 0);
@@ -144,32 +123,30 @@ function ReconnectingResendingWebSocket(url){
   var ondatanotsent = function(data) {
     log.info("queueing message for resend");
     messages.push(data);
-  };
+  }.bind(this);
   var onreconnect = function() { 
     while (messages.length != 0){
       var message = messages.shift();
       this.send(message);
     }
   }.bind(this);
+
   this.originalondatanotsent = ondatanotsent;
   this.originalonreconnect = onreconnect;
   this.ondatanotsent = ondatanotsent;
   this.onreconnect = onreconnect
-  this.send = function() {
-    console.log(this.send);
-    ReconnectingWebSocket.send.apply(arguments);
+  this.send = function()  {
+    console.log("this is overridden");
+    if ( onreconnect != this.onreconnect || ondatanotsent != this.ondatanotsent ){
+      log.error("onreconnect or ondatanotsent have been reassigned, this could break resending!");
+    }
+    sender.apply(this, arguments);
   }.bind(this);
 }
 ReconnectingResendingWebSocket.prototype = Object.create(ReconnectingWebSocket.prototype);
 ReconnectingResendingWebSocket.constructor = ReconnectingResendingWebSocket;
-ReconnectingResendingWebSocket.prototype.send = function()  {
-    console.log("pants");
-    if ( onreconnect != this.onreconnect || ondatanotsent != this.ondatanotsent ){
-      log.error("onreconnect or ondatanotsent have been reassigned, this could break resending!");
-    }
-  }
 //
-// WS Constants the the 'class' Level
+// WS Constants at the 'class' Level
 ReconnectingResendingWebSocket.CONNECTING = ReconnectingWebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
 ReconnectingResendingWebSocket.OPEN = ReconnectingWebSocket.OPEN = OriginalWebSocket.OPEN;
 ReconnectingResendingWebSocket.CLOSING = ReconnectingWebSocket.CLOSING = OriginalWebSocket.CLOSING;
