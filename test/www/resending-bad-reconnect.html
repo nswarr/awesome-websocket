@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+
+<html lang="en" ng-app='theApp'>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title></title>
+  <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/angular.min.js"></script>
+  <script type="text/javascript">
+    function show(title, message){
+      var messageContainer = null;
+      body = document.getElementsByTagName('body')[0];
+      if ( message ){
+        messageContainer = document.createElement('p');
+        if (typeof(message) === 'object'){
+          message = JSON.stringify(message);
+        }
+        messageContainer.innerHTML = message;
+      }
+      heading = document.createElement("h3");
+      heading.innerHTML = title;
+      body.appendChild(heading);
+      if ( messageContainer ) {
+        body.appendChild(messageContainer);
+      }
+      body.appendChild(document.createElement('hr'));
+    }
+    var MyWebSocket = require("reconnecting-websocket").ReconnectingResendingWebSocket;
+    var ws = new MyWebSocket("ws://localhost:8080/socket");
+    ws.onmessage = function (m) { show('message', m.data); }
+    ws.onerror = function (e) { show('error'); }
+    ws.onclose = function () { show('close'); } 
+    ws.onreconnect = function() {};
+    ws.onopen = function(e) { show('opened'); };
+
+    angular.module('theApp', []).controller(
+      'ConfigController',
+      function($http, $scope){
+        $scope.ping = function() { ws.send("ping"); };
+        $scope.die = function() { ws.send("die"); };
+        $scope.dieNPing = function() {
+          ws.send("die");
+          setTimeout(function() { ws.send("ping"); }, 10);
+        };
+        $scope.dieNPingFast = function() {
+          ws.send("die");
+          ws.send("ping");
+        };
+        $scope.dieNPingNPing = function() {
+          ws.send("die");
+          setTimeout(function() { ws.send("ping"); }, 1);
+          setTimeout(function() { ws.send("ping"); }, 10);
+        };
+      }
+    );
+  </script>
+</head>
+<body>
+  <div ng-controller="ConfigController">
+    <button ng-click="ping()">Send Ping</button>
+    <button ng-click="die()">Die!</button>
+    <button ng-click="dieNPing()">DieNPing!</button>
+    <button ng-click="dieNPingFast()">DieNPingFast!</button>
+    <button ng-click="dieNPingNPing()">DieNPingNPing!</button>
+  </div>
+</body>
+</html>

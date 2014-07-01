@@ -1,9 +1,11 @@
-.PHONY: test watch
+.PHONY: test watch run-server
 
-test:
+build:
 	mkdir -p test/www/js
-	browserify index.js --outfile test/www/js/reconn.js
+	browserify -r ./index.js:reconnecting-websocket --outfile test/www/js/reconn.js
 
 watch:
-	DEBUG=true supervisor --ignore "./test"  -e ".litcoffee|.coffee|.js" test/server/server.js
-	
+	DEBUG=true supervisor -i test/www -e ".litcoffee|.coffee|.js" --exec make run-server
+
+run-server: build
+	test/server/server.js

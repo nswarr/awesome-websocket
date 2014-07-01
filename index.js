@@ -1,1 +1,1 @@
-module.exports.MakeWebSocketReconnecting = require("./src/reconnecting-websocket.js");
+module.exports = require("./src/reconnecting-websocket.js");
