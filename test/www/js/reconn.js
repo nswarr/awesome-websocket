@@ -846,7 +846,7 @@ function ReconnectingWebSocket(url, protocols){
   this.ondatanotsent = function() {};
   this.onreconnect = function () {};
 
-  function reconnect() {
+  this.reconnect = function() {
     log.info("reconnecting");
     if ( readyState === OriginalWebSocket.CONNECTING ||
          readyState === RECONNECTING || 
@@ -858,9 +858,7 @@ function ReconnectingWebSocket(url, protocols){
     var delay = reconnectAttempts++ > 9 ? 1024 : Math.pow(2, reconnectAttempts);
     readyState = RECONNECTING;
     setTimeout(connect, delay);
-  }
-  // make it 'public' too
-  this.reconnect = reconnect.bind(this);
+  }.bind(this);
 
   var connect = function() {
     readyState = OriginalWebSocket.CONNECTING;
@@ -874,6 +872,7 @@ function ReconnectingWebSocket(url, protocols){
       // fire again anyway, and shouldn't keep the socket from getting
       // GCd
     }
+
     this.underlyingWs = new OriginalWebSocket(url, protocols || []);
     this.underlyingWs.onopen  = function(evt){
       readyState = OriginalWebSocket.OPEN;
@@ -885,9 +884,9 @@ function ReconnectingWebSocket(url, protocols){
       reconnectAttempts = 0; // reset
     }.bind(this); 
 
-    // onclose, unless told to close by having our close() method called
-    // we'll ignore the close, and reconnect
     this.underlyingWs.onclose = function(evt){
+      // onclose, unless told to close by having our close() method called
+      // we'll ignore the close, and reconnect
       readyState = OriginalWebSocket.CLOSED;
       if (reconnectOnClose){
         this.reconnect();
@@ -916,24 +915,44 @@ function ReconnectingWebSocket(url, protocols){
   setTimeout(connect, 0);
 }
 
+/* A handy extension of our reconnecting web socket that will queue up messages
+ * and send them if the original attempt is unsuccessful.
+ *
+ * This one looks a bit like the ReconnectingWebSocket from which it inherits
+ * the majority of its functionality with a couple differences.
+ *
+ * Here we use the ondatanotsent and the onreconnect methods to implement the
+ * resend functionality.  This means that those events are not available to the
+ * caller, as such we try and detect this error condition and warn about it when
+ * sending
+ */
 function ReconnectingResendingWebSocket(url){
   ReconnectingWebSocket.apply(this, arguments);
-  var messages = [];
+  var unsentMessages = [];
+  // we're making 'local' versions of these event handlers because we want
+  // to remember them for later comparison during send.  This is so we can be nice
+  // and catch people who do things that may break our resending
   var ondatanotsent = function(data) {
     log.info("queueing message for resend");
-    messages.push(data);
+    unsentMessages.push(data);
   }.bind(this);
   var onreconnect = function() { 
-    while (messages.length != 0){
-      var message = messages.shift();
+    while (unsentMessages.length != 0){
+      var message = unsentMessages.shift();
       this.send(message);
     }
   }.bind(this);
 
+  // keep track of our originals
   this.originalondatanotsent = ondatanotsent;
   this.originalonreconnect = onreconnect;
+  // 'register' our event handlers
   this.ondatanotsent = ondatanotsent;
   this.onreconnect = onreconnect
+
+  // overriding the send method so we can check and see that our required event 
+  // handlers are still in place, otherwise we'll let them know but still try 
+  // and send as normal ( maybe the change is intentional )
   this.send = function()  {
     if ( onreconnect != this.onreconnect || ondatanotsent != this.ondatanotsent ){
       log.error("onreconnect or ondatanotsent have been reassigned, this could break resending!");
@@ -943,8 +962,9 @@ function ReconnectingResendingWebSocket(url){
 }
 ReconnectingResendingWebSocket.prototype = Object.create(ReconnectingWebSocket.prototype);
 ReconnectingResendingWebSocket.constructor = ReconnectingResendingWebSocket;
-//
-// WS Constants at the 'class' Level
+
+// WS Constants at the 'class' Level.  Adding these since we can replace the
+// native WebSocket and we still want people to be able to access them
 ReconnectingResendingWebSocket.CONNECTING = ReconnectingWebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
 ReconnectingResendingWebSocket.OPEN = ReconnectingWebSocket.OPEN = OriginalWebSocket.OPEN;
 ReconnectingResendingWebSocket.CLOSING = ReconnectingWebSocket.CLOSING = OriginalWebSocket.CLOSING;
@@ -955,6 +975,14 @@ function MakeWebSocketReconnecting(){
   global.UnMakeWebSocketReconnecting = function(){
     WebSocket = OriginalWebSocket;
     UnMakeWebSocketReconnecting = null;
+  };
+}
+
+function MakeWebSocketReconnectingAndResending(){
+  WebSocket = ReconnectingResendingWebSocket; 
+  global.UnMakeWebSocketReconnectingAndResending = function(){
+    WebSocket = OriginalWebSocket;
+    UnMakeWebSocketReconnectingAndResending = null;
   };
 }
 
