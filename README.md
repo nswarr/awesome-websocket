@@ -56,17 +56,17 @@ First of all, you'll to get the sucker into a format usable by your browser.
 
 ```bash
 
-        browserify -r ws-additions --outfile www/js/reconn.js
+browserify -r ws-additions --outfile www/js/reconn.js
 ```
 
 Then in an HTML page somewhere above js/reconn.js
 
 ```html
-        <script src="js/reconn.js"></script>
-        <script>
-          var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
-          var ws = new ReconnectingWebSocket("ws://localhost:8080/socket");
-        </script>
+<script src="js/reconn.js"></script>
+<script>
+  var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
+  var ws = new ReconnectingWebSocket("ws://localhost:8080/socket");
+</script>
 ```
 
 With that, your `ws` will handle reconnecting for you in the event that the 
