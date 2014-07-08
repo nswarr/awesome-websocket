@@ -11,83 +11,72 @@
     window.debug = true;
   </script>
   <script type="text/javascript" src="js/reconn.js"> </script>
-  <script type="text/javascript" src="js/angular.min.js"></script>
+  <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
-    function show(title, message){
-      var messageContainer = null;
-      body = document.getElementsByTagName('body')[0];
-      if ( message ){
-        messageContainer = document.createElement('p');
-        if (typeof(message) === 'object'){
-          message = JSON.stringify(message);
-        }
-        messageContainer.innerHTML = message;
-      }
-      heading = document.createElement("h3");
-      heading.innerHTML = title;
-      body.appendChild(heading);
-      if ( messageContainer ) {
-        body.appendChild(messageContainer);
-      }
-      body.appendChild(document.createElement('hr'));
-    }
     require("reconnecting-websocket").MakeWebSocketReconnecting();
-    var ws = new WebSocket("ws://localhost:8080/socket");
-    var iropen = false;
-    ws.onmessage = function (m) { show('message', m.data); }
-    ws.onerror = function (e) { show('error'); }
-    ws.onclose = function () { show('close'); } 
-    ws.onreconnect = function () { show('reconnect'); }
-    ws.onopen = function(e) { iropen=true; show('opened'); };
-    ws.ondatanotsent = function (d) { show('didntsend', d); }
 
-    QUnit.test('is connected', function(assert){
-      assert.ok(iropen, 'socket is open');
+    QUnit.test('should have unmake', function(assert){
+      assert.ok(UnMakeWebSocketReconnecting, 'unmake available');
     });
-    /*
-    QUnit.test('is connected 2', function(assert){
-      assert.ok(iropen, 'socket is open');
-    });
-    */
+
     QUnit.asyncTest('connect on create', function(assert) {
-      expect(1);
-      new WebSocket("ws://localhost:8080/socket").onopen = function() {
+      expect(2);
+      var ws = new WebSocket("ws://localhost:8080/socket")
+      ws.onopen = function() {
         assert.ok(true, 'socket opened');
-        QUnit.start();
+        ws.close();
       };
+      ws.onclose = function() {
+        assert.ok(true, 'close event called');
+        QUnit.start();
+      }
     });
 
-    angular.module('theApp', []).controller(
-      'ConfigController',
-      function($http, $scope){
-        $scope.ping = function() { ws.send("ping"); };
-        $scope.die = function() { ws.send("die"); };
-        $scope.dieNPing = function() {
-          ws.send("die");
-          setTimeout(function() { ws.send("ping"); }, 10);
-        };
-        $scope.dieNPingFast = function() {
-          ws.send("die");
-          ws.send("ping");
-        };
-        $scope.dieNPingNPing = function() {
-          ws.send("die");
-          setTimeout(function() { ws.send("ping"); }, 1);
-          setTimeout(function() { ws.send("ping"); }, 10);
-        };
+    QUnit.asyncTest('will reconnect', function(assert) {
+      expect(4);
+      var ws = new WebSocket("ws://localhost:8080/socket");
+      ws.onopen = function() {
+        assert.ok(true, 'socket opened');
+        ws.send('die');
+      };
+      // depending on timings and such we'll get some number of error
+      // events, we really just want to make sure we get _at least_ one
+      // error event here...
+      ws.onerror = _.once(function(){assert.ok(true, 'error event raised')});
+      ws.onreconnect = function() {
+        assert.ok(true, 'socket reconnected')
+        ws.close();
+      };
+      ws.onclose = function() {
+        assert.ok(true, 'close event called');
+        QUnit.start();
       }
-    );
+    });
+
+    QUnit.asyncTest('receives message', function(assert) {
+      expect(2);
+      var ws = new WebSocket("ws://localhost:8080/socket")
+      ws.onopen = function() {
+        ws.send('ping');
+      };
+      var closeAfterMessages = _.after(2, ws.close);
+      ws.onmessage = function(message){
+        console.log(message);
+        if (message.data === "connected"){
+          assert.ok(true, 'received connected message');
+        } else {
+          assert.ok(message.data === "pong", 'received message');
+        }
+        closeAfterMessages(); 
+      };
+      ws.onclose = function() {
+        QUnit.start();
+      }
+    });
   </script>
 </head>
 <body>
   <div id="qunit"></div>
   <div id="qunit-fixture"></div>
-  <div ng-controller="ConfigController">
-    <button ng-click="ping()">Send Ping</button>
-    <button ng-click="die()">Die!</button>
-    <button ng-click="dieNPing()">DieNPing!</button>
-    <button ng-click="dieNPingFast()">DieNPingFast!</button>
-    <button ng-click="dieNPingNPing()">DieNPingNPing!</button>
-  </div>
 </body>
 </html>

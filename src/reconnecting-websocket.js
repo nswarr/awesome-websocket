@@ -49,10 +49,11 @@ function ReconnectingWebSocket(url, protocols){
   this.onclose   = function () {};
   this.onmessage = function () {};
 
-  this.underlyingWs        = null;
+  this.underlyingWs       = null;
   var reconnectOnClose    = true;
   var reconnectAttempts   = 0;
-  var readyState         = -1;
+  var readyState          = -1;
+  var totalConnects       = 0;
 
   this.ondatanotsent = function() {};
   this.onreconnect = function () {};
@@ -87,12 +88,13 @@ function ReconnectingWebSocket(url, protocols){
     this.underlyingWs = new OriginalWebSocket(url);
     this.underlyingWs.onopen  = function(evt){
       readyState = OriginalWebSocket.OPEN;
-      if ( reconnectAttempts === 0 ) {
+      if ( totalConnects === 0 ) {
         this.onopen(evt);
       } else {
         this.onreconnect();
       }
       reconnectAttempts = 0; // reset
+      totalConnects++;
     }.bind(this); 
 
     this.underlyingWs.onclose = function(evt){
@@ -198,5 +200,6 @@ function MakeWebSocketReconnectingAndResending(){
 }
 
 module.exports.MakeWebSocketReconnecting = MakeWebSocketReconnecting;
+module.exports.MakeWebSocketReconnectingAndResending = MakeWebSocketReconnectingAndResending;
 module.exports.ReconnectingWebSocket = ReconnectingWebSocket;
 module.exports.ReconnectingResendingWebSocket = ReconnectingResendingWebSocket;

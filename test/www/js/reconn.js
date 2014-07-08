@@ -702,13 +702,13 @@ function hasOwnProperty(obj, prop) {
   write = function(level, message, formatParams) {
     if (formatParams) {
       formatParams.unshift(message);
-      if (process.env.NOLOGPID || window) {
+      if (process.env.NOLOGPID) {
         return util.log("[" + level + "] " + (util.format.apply(util.format, formatParams)));
       } else {
         return util.log("[" + process.pid + "] [" + level + "] " + (util.format.apply(util.format, formatParams)));
       }
     } else {
-      if (process.env.NOLOGPID || window) {
+      if (process.env.NOLOGPID) {
         return util.log("[" + level + "] " + message);
       } else {
         return util.log("[" + process.pid + "] [" + level + "] " + message);
@@ -735,14 +735,14 @@ function hasOwnProperty(obj, prop) {
     debug: function() {
       var message, others;
       message = arguments[0], others = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (process.env.DEBUG || (typeof window !== "undefined" && window !== null ? window.debug : void 0)) {
+      if (process.env.DEBUG) {
         return write("DEBUG", message, others);
       }
     },
     event: function() {
       var message, others;
       message = arguments[0], others = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (process.env.DEBUG || (typeof window !== "undefined" && window !== null ? window.debug : void 0)) {
+      if (process.env.DEBUG) {
         return write("EVENT", message, others);
       }
     }
@@ -851,10 +851,11 @@ function ReconnectingWebSocket(url, protocols){
   this.onclose   = function () {};
   this.onmessage = function () {};
 
-  this.underlyingWs        = null;
+  this.underlyingWs       = null;
   var reconnectOnClose    = true;
   var reconnectAttempts   = 0;
-  var readyState         = -1;
+  var readyState          = -1;
+  var totalConnects       = 0;
 
   this.ondatanotsent = function() {};
   this.onreconnect = function () {};
@@ -889,12 +890,13 @@ function ReconnectingWebSocket(url, protocols){
     this.underlyingWs = new OriginalWebSocket(url);
     this.underlyingWs.onopen  = function(evt){
       readyState = OriginalWebSocket.OPEN;
-      if ( reconnectAttempts === 0 ) {
+      if ( totalConnects === 0 ) {
         this.onopen(evt);
       } else {
         this.onreconnect();
       }
       reconnectAttempts = 0; // reset
+      totalConnects++;
     }.bind(this); 
 
     this.underlyingWs.onclose = function(evt){
@@ -1000,6 +1002,7 @@ function MakeWebSocketReconnectingAndResending(){
 }
 
 module.exports.MakeWebSocketReconnecting = MakeWebSocketReconnecting;
+module.exports.MakeWebSocketReconnectingAndResending = MakeWebSocketReconnectingAndResending;
 module.exports.ReconnectingWebSocket = ReconnectingWebSocket;
 module.exports.ReconnectingResendingWebSocket = ReconnectingResendingWebSocket;
 
