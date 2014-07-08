@@ -64,11 +64,11 @@ Then in an HTML page somewhere above js/reconn.js
 ```html
         <script src="js/reconn.js"></script>
         <script>
-          var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket;
+          var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
           var ws = new ReconnectingWebSocket("ws://localhost:8080/socket");
         </script>
 ```
 
 With that, your `ws` will handle reconnecting for you in the event that the 
-server at `ws://localhost:8080/socket` was to disappear.
+server at `ws://localhost:8080/socket` disappears.
 
