@@ -43,6 +43,20 @@ and `ondatanotsent`).
 ....
 
 
+### You sure it works?
+
+While the only place this currently has been tested is in Chrome (newish versions)
+and nodejs.  There are some QUnit tests available to prove it does (or doesn't)
+work.
+
+```bash
+git clone https://github.com/igroff/ws-additions.git
+make watch
+```
+
+Once you've done that successfully you should find a test page at `http://localhost:8080/index.html`
+
+
 
 ### Usage!
 
