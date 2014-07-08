@@ -28,7 +28,7 @@ isn't connected when you call 'send'.
 * Hunting ( future ) - given a list of hosts, find the fastest available and use
 it.
 
-### Can you make me an Ass?
+### ASSumptions
 It turns out we can make some assumptions in this whole process that make development
 a little easier, but may change the way you interact with WebSockets when you 
 use this package.
