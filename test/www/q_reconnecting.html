@@ -50,6 +50,26 @@
         QUnit.start();
       }
     });
+    QUnit.asyncTest('receives message', function(assert) {
+      expect(2);
+      var ws = new WebSocket("ws://localhost:8080/socket")
+      ws.onopen = function() {
+        ws.send('ping');
+      };
+      var closeAfterMessages = _.after(2, ws.close);
+      ws.onmessage = function(message){
+        console.log(message);
+        if (message.data === "connected"){
+          assert.ok(true, 'received connected message');
+        } else {
+          assert.ok(message.data === "pong", 'received message');
+        }
+        closeAfterMessages(); 
+      };
+      ws.onclose = function() {
+        QUnit.start();
+      }
+    });
   </script>
 </head>
 <body>
