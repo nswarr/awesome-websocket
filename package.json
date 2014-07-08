@@ -4,9 +4,13 @@
   "description": "A handy helper that replaces the existing WebSocket object with one that looks quite a bit similar, yet reconnects.  In the event of there being no WebSocket, one is provided fo r you via 'ws'.",
   "main": "index.js",
   "scripts": {
-    "test": "browserify index.js --outfile test/www/js/reconn.js"
   },
   "author": "",
+  "contributors": [
+    {"name": "Ian Groff", "url": "https://github.com/igroff"},
+    {"name": "Ryan Fairchild", "url": "https://github.com/unscene"},
+    {"name": "David Hayes", "url": "https://drhayes.io"}
+  ],
   "license": "ISC",
   "dependencies": {
     "ws": "0.4.31",
