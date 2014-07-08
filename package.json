@@ -1,17 +1,21 @@
 {
-  "name": "reconnecting-websocket",
+  "name": "ws-additions",
   "version": "0.0.1",
-  "description": "A handy helper that replaces the existing WebSocket object with one that looks quite a bit similar, yet reconnects.  In the event of there being no WebSocket, one is provided fo r you via 'ws'.",
+  "description": "Helpful additional functionality for the vanilla WebSocket.",
+  "keywords": ["WebSocket","reconnect","reconnecting","resend"],
   "main": "index.js",
-  "scripts": {
-    "test": "browserify index.js --outfile test/www/js/reconn.js"
-  },
-  "author": "",
+  "author": {"name": "Ian Groff"},
+  "contributors": [
+    {"name": "Ian Groff", "url": "https://github.com/igroff"},
+    {"name": "Ryan Fairchild", "url": "https://github.com/unscene"},
+    {"name": "David Hayes", "url": "https://drhayes.io"}
+  ],
   "license": "ISC",
+  "repository": {"type": "git", "url": "https://github.com/igroff/ws-additions.git"},
   "dependencies": {
-    "ws": "0.4.31",
-    "simplog": "0.0.8",
-    "object-mixin":"0.2.1"
+    "ws": "0.4.31",    
+    "object-mixin":"0.2.1",
+    "simplog": "0.1.0"
   },
   "devDependencies": {
     "express": "4.4.5",
@@ -20,7 +24,6 @@
     "errorhandler": "1.1.1",
     "browserify": "4.2.0",
     "serve-static": "1.3.0",
-    "zombie": "2.0.0-alpha31",
     "supervisor": "0.6.0"
   }
 }
