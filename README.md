@@ -54,7 +54,10 @@ WebSocket implementation with the one of your choosing.
 First of all, you'll to get the sucker into a format usable by your browser.
 'round here we like browserify.
 
+```bash
+
         browserify -r ws-additions --outfile www/js/reconn.js
+```
 
 Then in an HTML page somewhere above js/reconn.js
 
