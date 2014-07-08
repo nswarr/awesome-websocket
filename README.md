@@ -72,3 +72,18 @@ Then in an HTML page somewhere above js/reconn.js
 With that, your `ws` will handle reconnecting for you in the event that the 
 server at `ws://localhost:8080/socket` disappears.
 
+You can also, opt to have it replace the native WebSocket
+
+```html
+        <script src="js/reconn.js"></script>
+        <script>
+          require("reconnecting-websocket").MakeWebSocketReconnecting();
+          // now all your calls to new WebSocket will return 
+          // ReconnectingWebSockets!
+          var ws = new WebSocket("ws://localhost:8080/socket")
+          // woah, that was really dumb I wish to never create another 
+          // ReconnectingWebSocket when calling new WebSocket
+          UnMakeWebSocketReconnecting();
+        </script>
+```
+
