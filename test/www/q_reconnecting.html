@@ -15,6 +15,9 @@
   <script type="text/javascript">
     require("reconnecting-websocket").MakeWebSocketReconnecting();
 
+    QUnit.test('should have unmake', function(assert){
+      assert.ok(UnMakeWebSocketReconnecting, 'unmake available');
+    });
     QUnit.asyncTest('connect on create', function(assert) {
       expect(2);
       var ws = new WebSocket("ws://localhost:8080/socket")
