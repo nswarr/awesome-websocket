@@ -702,13 +702,13 @@ function hasOwnProperty(obj, prop) {
   write = function(level, message, formatParams) {
     if (formatParams) {
       formatParams.unshift(message);
-      if (process.env.NOLOGPID || window) {
+      if (process.env.NOLOGPID || (typeof window !== "undefined" && window !== null)) {
         return util.log("[" + level + "] " + (util.format.apply(util.format, formatParams)));
       } else {
         return util.log("[" + process.pid + "] [" + level + "] " + (util.format.apply(util.format, formatParams)));
       }
     } else {
-      if (process.env.NOLOGPID || window) {
+      if (process.env.NOLOGPID || (typeof window !== "undefined" && window !== null)) {
         return util.log("[" + level + "] " + message);
       } else {
         return util.log("[" + process.pid + "] [" + level + "] " + message);
