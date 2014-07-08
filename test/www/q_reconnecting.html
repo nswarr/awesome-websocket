@@ -16,14 +16,19 @@
     require("reconnecting-websocket").MakeWebSocketReconnecting();
 
     QUnit.asyncTest('connect on create', function(assert) {
-      expect(1);
-      new WebSocket("ws://localhost:8080/socket").onopen = function() {
+      expect(2);
+      var ws = new WebSocket("ws://localhost:8080/socket")
+      ws.onopen = function() {
         assert.ok(true, 'socket opened');
-        QUnit.start();
+        ws.close();
       };
+      ws.onclose = function() {
+        assert.ok(true, 'close event called');
+        QUnit.start();
+      }
     });
     QUnit.asyncTest('will reconnect', function(assert) {
-      expect(3);
+      expect(4);
       var ws = new WebSocket("ws://localhost:8080/socket");
       ws.onopen = function() {
         assert.ok(true, 'socket opened');
@@ -35,8 +40,12 @@
       ws.onerror = _.once(function(){assert.ok(true, 'error event raised')});
       ws.onreconnect = function() {
         assert.ok(true, 'socket reconnected')
-        QUnit.start();
+        ws.close();
       };
+      ws.onclose = function() {
+        assert.ok(true, 'close event called');
+        QUnit.start();
+      }
     });
   </script>
 </head>
