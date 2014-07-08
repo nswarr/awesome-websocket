@@ -1,4 +1,5 @@
 log = require('simplog');
+require('object-mixin');
 
 // we may replace the 'native' websocket, so we'll be keeping track of the 
 // original so we can reference it or put it back if asked
@@ -199,7 +200,28 @@ function MakeWebSocketReconnectingAndResending(){
   };
 }
 
+function KeepAliveMixin() {}
+
+KeepAliveMixin.prototype.keepAlive = function(ms, msg) {
+  this.msg = msg
+  
+  this.keepAliveTimer = setInterval(function(){
+    if(this.readyState !== this.CLOSING &&
+      this.readyState !== this.CLOSED) {
+
+      log.info('keep-alive',msg);
+      
+      this.send(msg);
+    }   
+  }.bind(this),ms); 
+}
+
+KeepAliveMixin.prototype.clearKeepAlive = function(ms, msg) {
+  clearInterval(this.keepAliveTimer);
+}
+
 module.exports.MakeWebSocketReconnecting = MakeWebSocketReconnecting;
 module.exports.MakeWebSocketReconnectingAndResending = MakeWebSocketReconnectingAndResending;
 module.exports.ReconnectingWebSocket = ReconnectingWebSocket;
 module.exports.ReconnectingResendingWebSocket = ReconnectingResendingWebSocket;
+module.exports.KeepAliveWebSocket = Object.mixin(WebSocket.prototype,KeepAliveMixin.prototype)

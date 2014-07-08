@@ -1,7 +1,6 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"Focm2+":[function(require,module,exports){
 module.exports = require("./src/reconnecting-websocket.js");
-
-},{"./src/reconnecting-websocket.js":9}],"reconnecting-websocket":[function(require,module,exports){
+},{"./src/reconnecting-websocket.js":10}],"reconnecting-websocket":[function(require,module,exports){
 module.exports=require('Focm2+');
 },{}],3:[function(require,module,exports){
 if (typeof Object.create === 'function') {
@@ -691,6 +690,219 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./support/isBuffer":5,"FWaASH":4,"inherits":3}],7:[function(require,module,exports){
+/*!
+           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                   Version 2, December 2004
+
+Copyright (C) 2013 Andrea Giammarchi <spam@hater.me>
+
+Everyone is permitted to copy and distribute verbatim or modified
+copies of this license document, and changing it is allowed as long
+as the name is changed.
+
+           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+  TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+ 0. You just DO WHAT THE FUCK YOU WANT TO.
+*/
+/*jslint browser: true, forin: true, plusplus: true, indent: 4 */
+(function(Object, mixin) {
+    "use strict"; // happy linter ^_____^
+
+    /* <droppable> interesting code after line 110, here
+     * ad-hoc polyfill section for this purpose only
+     * never use these functions outside this closure ... like ...
+ne*/var
+
+        // borrowed methods for unknown Objects
+        ObjectPrototype = Object.prototype,
+
+        lookupGetter = ObjectPrototype.__lookupGetter__,
+        lookupSetter = ObjectPrototype.__lookupSetter__,
+        defineGetter = ObjectPrototype.__defineGetter__,
+        defineSetter = ObjectPrototype.__defineSetter__,
+        has          = ObjectPrototype.hasOwnProperty,
+
+        emptyArray   = [],
+        // slice        = emptyArray.slice,
+
+        // for IE < 9 and non IE5 yet browsers
+        goNative = true,
+        defineProperty = (function(defineProperty){
+          try{
+            return defineProperty && defineProperty({},'_',{value:1})._ && defineProperty;
+          } catch(IE8) {
+            goNative = false;
+          }
+        }(Object.defineProperty)) ||
+        function (o, k, d) {
+            var
+                get = d.get, // has.call(d, 'get') would be better but
+                set = d.set; // ES5 is just like this
+            if (get && defineGetter) {
+                defineGetter.call(o, k, get);
+            }
+            if (set && defineSetter) {
+                defineSetter.call(o, k, set);
+            }
+            if (!(get || set)) {
+                o[k] = d.value;
+            }
+        },
+        // for IE < 9 and non IE5 yet browsers
+        getOwnPropertyNames = (goNative && Object.getOwnPropertyNames) ||
+        (function () {
+            var
+                addHiddenOwnProperties = function (result) {
+                    return result;
+                },
+                list = [],
+                key,
+                i,
+                length;
+
+            for (key in {valueOf: key}) {
+                list.push(key);
+            }
+
+            if (!list.length) {
+                length = list.push(
+                    'constructor',
+                    'hasOwnProperty',
+                    'isPrototypeOf',
+                    'propertyIsEnumerable',
+                    'toLocaleString',
+                    'toString',
+                    'valueOf'
+                ) - 1;
+                addHiddenOwnProperties = function (result, o) {
+                    for (i = 0; i < length; i++) {
+                        key = list[i];
+                        if (has.call(o, key)) {
+                            result.push(key);
+                        }
+                    }
+                    return result;
+                };
+            }
+
+            return function (o) {
+                var
+                    result = [],
+                    key;
+                for (key in o) {
+                    if (has.call(o, key)) {
+                        result.push(key);
+                    }
+                }
+                return addHiddenOwnProperties(result, o);
+            };
+        }()),
+        // IE < 9 or other non ES5 yet browsers
+        getOwnPropertyDescriptor = (goNative && Object.getOwnPropertyDescriptor) ||
+        function (o, k) {
+            var
+                descriptor = {
+                    enumerable: true,
+                    configurable: true
+                },
+                get = lookupGetter && lookupGetter.call(o, k),
+                set = lookupSetter && lookupSetter.call(o, k);
+            if (get) {
+                descriptor.get = get;
+            }
+            if (set) {
+                descriptor.set = set;
+            }
+            if (!(get || set)) {
+                descriptor.writable = true;
+                descriptor.value = o[k];
+            }
+            return descriptor;
+        };
+    // </droppable>
+
+    // if already defined get out of here
+    // this should be 
+    // if (mixin in Object) return;
+    // but for some reason I went for JSLint ... 
+    if (Object[mixin]) {
+        return;
+    }
+    // same descriptor as other spec'd methods
+    defineProperty(
+        Object,
+        mixin,
+        {
+            enumerable: false,
+            writable: true,
+            configurable: true,
+            value: function (
+                target, // object to enrich with
+                source, // mixin object or Trait (Function)
+                args    // optional arguments for Trait
+            ) {
+                var
+                    i,
+                    length,
+                    keys,
+                    key;
+
+                if (typeof source === 'function') {
+                    // if the source is a function
+                    // it will be invoked with object as target
+                    // this let us define mixin as closures
+                    // function addFunctionality() {
+                    //     this.functionality = function () {
+                    //       // do amazing stuff
+                    //     }
+                    // }
+                    // addFunctionality.call(Class.prototype);
+                    // addFunctionality.call(genericObject);
+                    // // or
+                    // Object.mixin(Class.prototype, addFunctionality);
+
+                    source.apply(target, args || emptyArray);
+                    /*
+                    // try to perform as fast as possible
+                    if (arguments.length < 3) {
+                        // so if no extra args are passed ...
+                        source.call(target);
+                    } else {
+                        // there is no need to slice them as done here
+                        source.apply(target, slice.call(arguments, 2));
+                    }
+                    */
+                } else {
+                    // if source is an object
+                    // grab all possibe properties
+                    // and per each of them ...
+                    keys = getOwnPropertyNames(source);
+                    length = keys.length;
+                    i = 0;
+                    while (i < length) {
+                        key = keys[i++];
+                        // ... define it ...
+                        defineProperty(
+                            target,
+                            key,
+                            // ... using the same descriptor
+                            getOwnPropertyDescriptor(
+                                source,
+                                key
+                            )
+                        );
+                    }
+                }
+                // always return the initial target
+                // ignoring all possible different return with functions
+                return target;
+            }
+        }
+    );
+}(Object, 'mixin'));
+module.exports = Object.mixin;
+},{}],8:[function(require,module,exports){
 (function (process){
 // Generated by CoffeeScript 1.6.3
 (function() {
@@ -702,13 +914,13 @@ function hasOwnProperty(obj, prop) {
   write = function(level, message, formatParams) {
     if (formatParams) {
       formatParams.unshift(message);
-      if (process.env.NOLOGPID) {
+      if (process.env.NOLOGPID || window) {
         return util.log("[" + level + "] " + (util.format.apply(util.format, formatParams)));
       } else {
         return util.log("[" + process.pid + "] [" + level + "] " + (util.format.apply(util.format, formatParams)));
       }
     } else {
-      if (process.env.NOLOGPID) {
+      if (process.env.NOLOGPID || window) {
         return util.log("[" + level + "] " + message);
       } else {
         return util.log("[" + process.pid + "] [" + level + "] " + message);
@@ -735,14 +947,14 @@ function hasOwnProperty(obj, prop) {
     debug: function() {
       var message, others;
       message = arguments[0], others = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (process.env.DEBUG) {
+      if (process.env.DEBUG || (typeof window !== "undefined" && window !== null ? window.debug : void 0)) {
         return write("DEBUG", message, others);
       }
     },
     event: function() {
       var message, others;
       message = arguments[0], others = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (process.env.DEBUG) {
+      if (process.env.DEBUG || (typeof window !== "undefined" && window !== null ? window.debug : void 0)) {
         return write("EVENT", message, others);
       }
     }
@@ -753,7 +965,7 @@ function hasOwnProperty(obj, prop) {
 }).call(this);
 
 }).call(this,require("FWaASH"))
-},{"FWaASH":4,"util":6}],8:[function(require,module,exports){
+},{"FWaASH":4,"util":6}],9:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -798,9 +1010,10 @@ function ws(uri, protocols, opts) {
 
 if (WebSocket) ws.prototype = WebSocket.prototype;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (global){
 log = require('simplog');
+require('object-mixin');
 
 // we may replace the 'native' websocket, so we'll be keeping track of the 
 // original so we can reference it or put it back if asked
@@ -1001,10 +1214,31 @@ function MakeWebSocketReconnectingAndResending(){
   };
 }
 
+function KeepAliveMixin() {}
+
+KeepAliveMixin.prototype.keepAlive = function(ms, msg) {
+  this.msg = msg
+  
+  this.keepAliveTimer = setInterval(function(){
+    if(this.readyState !== this.CLOSING &&
+      this.readyState !== this.CLOSED) {
+
+      log.info('keep-alive',msg);
+      
+      this.send(msg);
+    }   
+  }.bind(this),ms); 
+}
+
+KeepAliveMixin.prototype.clearKeepAlive = function(ms, msg) {
+  clearInterval(this.keepAliveTimer);
+}
+
 module.exports.MakeWebSocketReconnecting = MakeWebSocketReconnecting;
 module.exports.MakeWebSocketReconnectingAndResending = MakeWebSocketReconnectingAndResending;
 module.exports.ReconnectingWebSocket = ReconnectingWebSocket;
 module.exports.ReconnectingResendingWebSocket = ReconnectingResendingWebSocket;
+module.exports.KeepAliveWebSocket = Object.mixin(WebSocket.prototype,KeepAliveMixin.prototype)
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"simplog":7,"ws":8}]},{},[])
+},{"object-mixin":7,"simplog":8,"ws":9}]},{},[])
