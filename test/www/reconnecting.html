@@ -4,7 +4,12 @@
 <html lang="en" ng-app='theApp'>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <title></title>
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
+  <title>reconnecting websocket tests</title>
+  <script src="//code.jquery.com/qunit/qunit-1.14.0.js"></script>
+  <script type="text/javascript">
+    window.debug = true;
+  </script>
   <script type="text/javascript" src="js/reconn.js"> </script>
   <script type="text/javascript" src="js/angular.min.js"></script>
   <script type="text/javascript">
@@ -28,12 +33,29 @@
     }
     require("reconnecting-websocket").MakeWebSocketReconnecting();
     var ws = new WebSocket("ws://localhost:8080/socket");
+    var iropen = false;
     ws.onmessage = function (m) { show('message', m.data); }
     ws.onerror = function (e) { show('error'); }
     ws.onclose = function () { show('close'); } 
     ws.onreconnect = function () { show('reconnect'); }
-    ws.onopen = function(e) { show('opened'); };
+    ws.onopen = function(e) { iropen=true; show('opened'); };
     ws.ondatanotsent = function (d) { show('didntsend', d); }
+
+    QUnit.test('is connected', function(assert){
+      assert.ok(iropen, 'socket is open');
+    });
+    /*
+    QUnit.test('is connected 2', function(assert){
+      assert.ok(iropen, 'socket is open');
+    });
+    */
+    QUnit.asyncTest('connect on create', function(assert) {
+      expect(1);
+      new WebSocket("ws://localhost:8080/socket").onopen = function() {
+        assert.ok(true, 'socket opened');
+        QUnit.start();
+      };
+    });
 
     angular.module('theApp', []).controller(
       'ConfigController',
@@ -58,6 +80,8 @@
   </script>
 </head>
 <body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
   <div ng-controller="ConfigController">
     <button ng-click="ping()">Send Ping</button>
     <button ng-click="die()">Die!</button>

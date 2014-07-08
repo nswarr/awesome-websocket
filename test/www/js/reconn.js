@@ -702,13 +702,13 @@ function hasOwnProperty(obj, prop) {
   write = function(level, message, formatParams) {
     if (formatParams) {
       formatParams.unshift(message);
-      if (process.env.NOLOGPID) {
+      if (process.env.NOLOGPID || window) {
         return util.log("[" + level + "] " + (util.format.apply(util.format, formatParams)));
       } else {
         return util.log("[" + process.pid + "] [" + level + "] " + (util.format.apply(util.format, formatParams)));
       }
     } else {
-      if (process.env.NOLOGPID) {
+      if (process.env.NOLOGPID || window) {
         return util.log("[" + level + "] " + message);
       } else {
         return util.log("[" + process.pid + "] [" + level + "] " + message);
@@ -735,14 +735,14 @@ function hasOwnProperty(obj, prop) {
     debug: function() {
       var message, others;
       message = arguments[0], others = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (process.env.DEBUG) {
+      if (process.env.DEBUG || (typeof window !== "undefined" && window !== null ? window.debug : void 0)) {
         return write("DEBUG", message, others);
       }
     },
     event: function() {
       var message, others;
       message = arguments[0], others = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (process.env.DEBUG) {
+      if (process.env.DEBUG || (typeof window !== "undefined" && window !== null ? window.debug : void 0)) {
         return write("EVENT", message, others);
       }
     }
@@ -806,10 +806,12 @@ log = require('simplog');
 // original so we can reference it or put it back if asked
 var OriginalWebSocket = null;
 if ( typeof(WebSocket) === "undefined" ){
+  log.debug("no native WebSocket found, using 'ws'");
   // as a convenience we'll provide a WebSocket implementation if
   // one isn't available, thus this will work in nodejs
   OriginalWebSocket = require("ws");
 } else {
+  log.debug("native WebSocket found");
   OriginalWebSocket = WebSocket;
 }
 
@@ -884,7 +886,7 @@ function ReconnectingWebSocket(url, protocols){
       // GCd
     }
 
-    this.underlyingWs = new OriginalWebSocket(url, protocols || []);
+    this.underlyingWs = new OriginalWebSocket(url);
     this.underlyingWs.onopen  = function(evt){
       readyState = OriginalWebSocket.OPEN;
       if ( reconnectAttempts === 0 ) {

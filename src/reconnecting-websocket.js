@@ -4,10 +4,12 @@ log = require('simplog');
 // original so we can reference it or put it back if asked
 var OriginalWebSocket = null;
 if ( typeof(WebSocket) === "undefined" ){
+  log.debug("no native WebSocket found, using 'ws'");
   // as a convenience we'll provide a WebSocket implementation if
   // one isn't available, thus this will work in nodejs
   OriginalWebSocket = require("ws");
 } else {
+  log.debug("native WebSocket found");
   OriginalWebSocket = WebSocket;
 }
 
@@ -82,7 +84,7 @@ function ReconnectingWebSocket(url, protocols){
       // GCd
     }
 
-    this.underlyingWs = new OriginalWebSocket(url, protocols || []);
+    this.underlyingWs = new OriginalWebSocket(url);
     this.underlyingWs.onopen  = function(evt){
       readyState = OriginalWebSocket.OPEN;
       if ( reconnectAttempts === 0 ) {

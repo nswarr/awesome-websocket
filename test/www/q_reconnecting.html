@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+
+<html lang="en" ng-app='theApp'>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
+  <title>reconnecting websocket tests</title>
+  <script src="//code.jquery.com/qunit/qunit-1.14.0.js"></script>
+  <script type="text/javascript">
+    window.debug = true;
+  </script>
+  <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/lodash.js"> </script>
+  <script type="text/javascript">
+    require("reconnecting-websocket").MakeWebSocketReconnecting();
+
+    QUnit.asyncTest('connect on create', function(assert) {
+      expect(1);
+      new WebSocket("ws://localhost:8080/socket").onopen = function() {
+        assert.ok(true, 'socket opened');
+        QUnit.start();
+      };
+    });
+    QUnit.asyncTest('will reconnect', function(assert) {
+      expect(3);
+      var ws = new WebSocket("ws://localhost:8080/socket");
+      ws.onopen = function() {
+        assert.ok(true, 'socket opened');
+        ws.send('die');
+      };
+      // depending on timings and such we'll get some number of error
+      // events, we really just want to make sure we get _at least_ one
+      // error event here...
+      ws.onerror = _.once(function(){assert.ok(true, 'error event raised')});
+      ws.onreconnect = function() {
+        assert.ok(true, 'socket reconnected')
+        QUnit.start();
+      };
+    });
+  </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+</body>
+</html>
