@@ -2,12 +2,21 @@
 
 # WebSocket Additions - Documentation Woefully Incomplete (DWI)
 
+### What is this thing?
+
+##### concise
+
+WebSockets should do some stuff out of the box that they don't, this package
+attempts to add that.
+
+##### blowhard
 It appears useful to add some basic functionality to the native WebSocket.  At
 the very least, it appears as if people find themselves coding the same basic
 functionality around the native WebSocket as we convert applications to be more
 WebSocket centric.  This package intends to be a source of some of that common
 functionality bundled up for re-use, to avoid having people need to do the same
 things over and over.
+
 
 ### What is this functionality you're speaking of?
 
