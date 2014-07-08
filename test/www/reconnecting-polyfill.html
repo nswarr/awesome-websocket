@@ -13,11 +13,15 @@
   <script type="text/javascript" src="js/reconn.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
-    var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket;
+    require("reconnecting-websocket").MakeWebSocketReconnecting();
+
+    QUnit.test('should have unmake', function(assert){
+      assert.ok(UnMakeWebSocketReconnecting, 'unmake available');
+    });
 
     QUnit.asyncTest('connect on create', function(assert) {
       expect(2);
-      var ws = new ReconnectingWebSocket("ws://localhost:8080/socket")
+      var ws = new WebSocket("ws://localhost:8080/socket")
       ws.onopen = function() {
         assert.ok(true, 'socket opened');
         ws.close();
@@ -30,7 +34,7 @@
 
     QUnit.asyncTest('will reconnect', function(assert) {
       expect(4);
-      var ws = new ReconnectingWebSocket("ws://localhost:8080/socket");
+      var ws = new WebSocket("ws://localhost:8080/socket");
       ws.onopen = function() {
         assert.ok(true, 'socket opened');
         ws.send('die');
@@ -51,7 +55,7 @@
 
     QUnit.asyncTest('receives message', function(assert) {
       expect(2);
-      var ws = new ReconnectingWebSocket("ws://localhost:8080/socket")
+      var ws = new WebSocket("ws://localhost:8080/socket")
       ws.onopen = function() {
         ws.send('ping');
       };
