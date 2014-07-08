@@ -51,6 +51,7 @@ work.
 
 ```bash
 git clone https://github.com/igroff/ws-additions.git
+cd ws-additions/
 make watch
 ```
 
