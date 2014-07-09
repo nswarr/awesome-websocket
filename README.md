@@ -134,7 +134,14 @@ Then in an HTML page somewhere above js/reconn.js
   var ws = new ReconnectingWebSocket("ws://localhost:8080/socket");
 </script>
 ```
-
+-- or --
+```html
+<script src="js/reconn.js"></script>
+<script>
+  var ReconnectingResendingWebSocket = require("ws-additions").ReconnectingResendingWebSocket;
+  var ws = new ReconnectingResendingWebSocket("ws://localhost:8080/socket");
+</script>
+```
 With that, your `ws` will handle reconnecting for you in the event that the 
 server at `ws://localhost:8080/socket` disappears.
 
