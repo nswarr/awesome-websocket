@@ -58,7 +58,6 @@
       };
       var closeAfterMessages = _.after(2, ws.close);
       ws.onmessage = function(message){
-        console.log(message);
         if (message.data === "connected"){
           assert.ok(true, 'received connected message');
         } else {
