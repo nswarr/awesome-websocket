@@ -897,7 +897,7 @@ function ReconnectingWebSocket(url, protocols){
       if ( totalConnects === 0 ) {
         this.onopen(evt);
       } else {
-        this.onreconnect(new Event('onreconnect'));
+        this.onreconnect(new Event('reconnect'));
       }
       reconnectAttempts = 0; // reset
       totalConnects++;

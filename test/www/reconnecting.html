@@ -29,7 +29,7 @@
     });
 
     QUnit.asyncTest('will reconnect', function(assert) {
-      expect(4);
+      expect(5);
       var ws = new ReconnectingWebSocket("ws://localhost:8080/socket");
       ws.onopen = function() {
         assert.ok(true, 'socket opened');
@@ -39,7 +39,8 @@
       // events, we really just want to make sure we get _at least_ one
       // error event here...
       ws.onerror = _.once(function(){assert.ok(true, 'error event raised')});
-      ws.onreconnect = function() {
+      ws.onreconnect = function(e) {
+        assert.ok(e.type === 'reconnect', 'reconnect event type');
         assert.ok(true, 'socket reconnected')
         ws.close();
       };
