@@ -145,7 +145,7 @@ Then in an HTML page somewhere above js/reconn.js
 With that, your `ws` will handle reconnecting for you in the event that the 
 server at `ws://localhost:8080/socket` disappears.
 
-You can also opt to have it replace the native WebSocket, a polyfill if you will
+You can also opt to have it replace the native WebSocket, a polyfill if you will.
 
 ```html
 <script src="js/reconn.js"></script>
