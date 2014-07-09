@@ -46,7 +46,7 @@ and `ondatanotsent`).
 ### You sure it works?
 
 While the only place this currently has been tested is in Chrome (newish versions)
-and nodejs.  There are some QUnit tests available to prove it does (or doesn't)
+and nodejs, there are some QUnit tests available to prove it does (or doesn't)
 work.
 
 ```bash
@@ -87,7 +87,7 @@ Then in an HTML page somewhere above js/reconn.js
 With that, your `ws` will handle reconnecting for you in the event that the 
 server at `ws://localhost:8080/socket` disappears.
 
-You can also, opt to have it replace the native WebSocket
+You can also opt to have it replace the native WebSocket, a polyfill if you will
 
 ```html
 <script src="js/reconn.js"></script>
