@@ -159,4 +159,17 @@ You can also opt to have it replace the native WebSocket, a polyfill if you will
   UnMakeWebSocketReconnecting();
 </script>
 ```
+-- or --
+```html
+<script src="js/reconn.js"></script>
+<script>
+  require("reconnecting-websocket").MakeWebSocketReconnectingAndResending();
+  // now all your calls to new WebSocket will return 
+  // ReconnectingResendingWebSockets!
+  var ws = new WebSocket("ws://localhost:8080/socket")
+  // woah, that was really dumb I wish to never create another 
+  // ReconnectingResendingWebSocket when calling new WebSocket
+  UnMakeWebSocketReconnectingAndResending();
+</script>
+```
 
