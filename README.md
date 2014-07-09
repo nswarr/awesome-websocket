@@ -53,6 +53,10 @@ make watch
 
 Once you've done that successfully you should find a test page at `http://localhost:8080/index.html`
 
+### Usage!
+This package makes an object that looks a fair bit like a WebSocket available 
+to you. 
+
 #### What's a ReconnectingWebSocket look like?
 
 ```
@@ -108,11 +112,7 @@ interface ReconnectingResendingWebSocket : EventTarget {
   void send(ArrayBufferView data);
 ```
 
-
-### Usage!
-
-This package makes an object that looks a fair bit like a WebSocket available 
-to you.  You can consume the functionality in a couple ways, either by explicit
+You can consume the functionality in a couple ways, either by explicit
 creation of one of these 'enhanced WebSockets' or by replacing the native
 WebSocket implementation with the one of your choosing.
 
