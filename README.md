@@ -125,7 +125,7 @@ First of all, you'll to get the sucker into a format usable by your browser.
 browserify -r ws-additions --outfile www/js/reconn.js
 ```
 
-:shit: If you really want to, the most recent browserified version of this thing is
+####### :shit: If you really want to, the most recent browserified version of this thing is
 down there in `test/www/js/reconn.js`
 
 Then in an HTML page somewhere above js/reconn.js
