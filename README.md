@@ -26,7 +26,8 @@ it's good to have the socket just pickup as if the server were never gone.
 when you say ws.send('my message') that the message will go, even if the socket
 isn't connected when you call 'send'.
 * Hunting ( future ) - given a list of hosts, find the fastest available and use
-it.
+it.  Of course, if a problem is encountered with a 'connected' host drop it like
+a ton of bricks and go find the new 'best one'.
 
 ### ASSumptions
 It turns out we can make some assumptions in this whole process that make development
