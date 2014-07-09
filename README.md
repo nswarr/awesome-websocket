@@ -57,6 +57,36 @@ make watch
 
 Once you've done that successfully you should find a test page at `http://localhost:8080/index.html`
 
+### What's it look like?
+
+```IDL
+[Constructor(DOMString url)]
+interface ReconnectingWebSocket : EventTarget {
+  readonly attribute DOMString url;
+  attribute WebSocket underlyingWs;
+
+  // ready state
+  const unsigned short CONNECTING = 0;
+  const unsigned short OPEN = 1;
+  const unsigned short CLOSING = 2;
+  const unsigned short CLOSED = 3;
+  readonly attribute unsigned short readyState;
+
+  // networking
+           attribute EventHandler onopen;
+           attribute EventHandler onerror;
+           attribute EventHandler onclose;
+           attribute EventHandler onreconnect;
+  void close([Clamp] optional unsigned short code, optional DOMString reason);
+
+  // messaging
+           attribute EventHandler onmessage;
+           attribute EventHandler ondatanotsent;
+  void send(DOMString data);
+  void send(Blob data);
+  void send(ArrayBuffer data);
+  void send(ArrayBufferView data);
+```
 
 
 ### Usage!

@@ -122,7 +122,7 @@ function ReconnectingWebSocket(url, protocols){
 
   this.close = function () {
     reconnectOnClose = false;
-    this.underlyingWs.close();
+    this.underlyingWs.close.apply(this.underlyingWs, arguments);
   }.bind(this);
 
   setTimeout(connect, 0);
