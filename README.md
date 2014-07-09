@@ -57,7 +57,7 @@ make watch
 
 Once you've done that successfully you should find a test page at `http://localhost:8080/index.html`
 
-### What's it look like?
+#### What's a ReconnectingWebSocket look like?
 
 ```
 [Constructor(DOMString url)]
@@ -81,6 +81,33 @@ interface ReconnectingWebSocket : EventTarget {
   // messaging
            attribute EventHandler onmessage;
            attribute EventHandler ondatanotsent;
+  void send(DOMString data);
+  void send(Blob data);
+  void send(ArrayBuffer data);
+  void send(ArrayBufferView data);
+```
+#### What's a ReconnectingResendingWebSocket look like?
+
+```
+[Constructor(DOMString url)]
+interface ReconnectingResendingWebSocket : EventTarget {
+  readonly attribute DOMString url;
+  attribute WebSocket underlyingWs;
+
+  // ready state
+  const unsigned short CONNECTING = 0;
+  const unsigned short OPEN = 1;
+  const unsigned short CLOSING = 2;
+  const unsigned short CLOSED = 3;
+
+  // networking
+           attribute EventHandler onopen;
+           attribute EventHandler onerror;
+           attribute EventHandler onclose;
+  void close([Clamp] optional unsigned short code, optional DOMString reason);
+
+  // messaging
+           attribute EventHandler onmessage;
   void send(DOMString data);
   void send(Blob data);
   void send(ArrayBuffer data);
