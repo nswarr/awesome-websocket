@@ -22,7 +22,7 @@ things over and over.
 
 * Reconnecting - in the event of the server going down intentionally or otherwise
 it's good to have the socket just pickup as if the server were never gone.
-* Queueing - as a consumer of a WebSocket enabled service, it'd sure be nice if
+* Resending - as a consumer of a WebSocket enabled service, it'd sure be nice if
 when you say ws.send('my message') that the message will go, even if the socket
 isn't connected when you call 'send'.
 * Hunting ( future ) - given a list of hosts, find the fastest available and use
