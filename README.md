@@ -59,7 +59,7 @@ Once you've done that successfully you should find a test page at `http://localh
 
 ### What's it look like?
 
-```IDL
+```idl
 [Constructor(DOMString url)]
 interface ReconnectingWebSocket : EventTarget {
   readonly attribute DOMString url;
