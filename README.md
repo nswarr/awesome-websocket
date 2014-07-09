@@ -39,10 +39,6 @@ full w3c defined WebSocket interface.
 to the full interface of the ReconnectingWebSocket (specifically `onreconnect`
 and `ondatanotsent`).
 
-
-....
-
-
 ### You sure it works?
 
 While the only place this currently has been tested is in Chrome (newish versions)
