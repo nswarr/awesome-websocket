@@ -62,7 +62,6 @@ Once you've done that successfully you should find a test page at `http://localh
 ```
 [Constructor(DOMString url)]
 interface ReconnectingWebSocket : EventTarget {
-  readonly attribute DOMString url;
   attribute WebSocket underlyingWs;
 
   // ready state
@@ -91,7 +90,6 @@ interface ReconnectingWebSocket : EventTarget {
 ```
 [Constructor(DOMString url)]
 interface ReconnectingResendingWebSocket : EventTarget {
-  readonly attribute DOMString url;
   attribute WebSocket underlyingWs;
 
   // ready state
