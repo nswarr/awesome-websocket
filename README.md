@@ -70,7 +70,6 @@ interface ReconnectingWebSocket : EventTarget {
   const unsigned short OPEN = 1;
   const unsigned short CLOSING = 2;
   const unsigned short CLOSED = 3;
-  readonly attribute unsigned short readyState;
 
   // networking
            attribute EventHandler onopen;
