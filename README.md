@@ -1,6 +1,6 @@
 
 
-# WebSocket Additions - `Documentation Woefully Incomplete (DWI)`
+# WebSocket Additions
 
 ### What is this thing?
 
