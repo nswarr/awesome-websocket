@@ -21,7 +21,7 @@ function sender(data){
   // if the socket isn't open, we'll just reconnect and let the
   // caller try again cause we know this raises an uncatchable
   // error
-  if (this.underlyingWs.readyState != OriginalWebSocket.OPEN){
+  if (this.underlyingWs == null || this.underlyingWs.readyState != OriginalWebSocket.OPEN){
     log.info("this.underlyingWs not open, reconnecting");
     this.reconnect();
     var e = new MessageEvent('datanotsent');
@@ -66,7 +66,7 @@ function ReconnectingWebSocket(url, protocols){
     log.info("reconnecting");
     if ( readyState === OriginalWebSocket.CONNECTING ||
          readyState === RECONNECTING || 
-         this.underlyingWs.readyState === OriginalWebSocket.CONNECTING )
+         (this.underlyingWs != null && this.underlyingWs.readyState === OriginalWebSocket.CONNECTING ))
     {
       return;
     }
