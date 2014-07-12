@@ -23,10 +23,10 @@ function sender(data){
   // error
   if (this.underlyingWs == null || this.underlyingWs.readyState != OriginalWebSocket.OPEN){
     log.info("this.underlyingWs not open, reconnecting");
-    this.reconnect();
     var e = new MessageEvent('datanotsent');
     e.data = data;
     this.ondatanotsent(e);
+    this.reconnect();
   } else {
     // otherwise we try to send, and if we have a failure
     // we'll go ahead and reconnect, telling our caller
@@ -34,14 +34,16 @@ function sender(data){
     try {
       log.info("sending: ", data);
       this.underlyingWs.send(data);
+      return true; //sent
     } catch (error) {
       log.error("error during send on this.underlyingWs", e);
-      this.reconnect();
       var e = new MessageEvent('datanotsent');
       e.data = data;
       this.ondatanotsent(e);
+      this.reconnect();
     }
   }
+  return false; // not sent
 }
 
 function ReconnectingWebSocket(url, protocols){

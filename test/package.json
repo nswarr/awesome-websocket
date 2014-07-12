@@ -1,0 +1,16 @@
+{
+  "name": "ws-additions.test",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Test package for ws-additions so we can test things like npm installing the package for use with browserify",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "supervisor": "^0.6.0",
+    "browserify": "^4.2.0"
+  }
+}
