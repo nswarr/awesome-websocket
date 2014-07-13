@@ -39,9 +39,9 @@ wss.on('connection', function(ws) {
       log.info("et, tu, Brute?");
       process.exit(1);
     } else if ( message === "what's your pid" ){
-      sendMessage(JSON.stringify({pid: process.pid}));
+      sendMessage({pid: process.pid});
     } else if ( message === "what's your port" ){
-      sendMessage(JSON.stringify({port: serverPort}));
+      sendMessage({port: serverPort});
     } else if ( JSON.parse(message) === null ){
       log.info("null message!");
     } else {

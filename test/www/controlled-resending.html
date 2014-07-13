@@ -35,9 +35,8 @@
           data = JSON.parse(evt.data);
           if (data.pid){
             this.pid = data.pid;
+            this.gotPid.resolve();
           }
-          console.log(this.pid);
-          this.gotPid.resolve();
         } catch (e) {
         }
       };
@@ -60,8 +59,10 @@
       testWs.onmessage = function(message){
         try{
           var mo = JSON.parse(message.data);
-          assert.ok(mo.echoThis === "please", "message");
-          testWs.close();
+          if ( mo.type === "echo" ){
+            assert.ok(mo.echoThis === "please", "message");
+            testWs.close();
+          }
         } catch(e) { 
         }
       }
