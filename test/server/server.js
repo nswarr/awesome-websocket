@@ -16,9 +16,11 @@ var server = http.createServer(app);
 
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({server: server, path: "/socket"});
+var serverPort = Number(process.env.PORT || 8080)
 
 wss.on('connection', function(ws) {
   ws.on('message', function(message) {
+    console.log("handling: " + message); 
     if ( message === "ping" ){
       console.log("pongin'");
       ws.send("pong");
@@ -27,6 +29,10 @@ wss.on('connection', function(ws) {
       process.exit(1);
     } else if ( message === "what's your pid" ){
       ws.send(JSON.stringify({pid: process.pid}));
+    } else if ( message === "what's your port" ){
+      ws.send(JSON.stringify({port: serverPort}));
+    } else if ( JSON.parse(message) === null ){
+      console.log("null message!");
     } else {
       var action = JSON.parse(message);
       if ( action.type === "kill" ){
@@ -40,10 +46,13 @@ wss.on('connection', function(ws) {
         ws.send(JSON.stringify(
           { type: "started", pid: worker.process.pid }
         ));
+      } else if ( action.type === "echo" ){
+        console.log("echoing: " + message);
+        ws.send(JSON.stringify(action));
       }
     }
   });
   ws.send('connected');
 });
 
-server.listen(process.env.PORT || 8080);
+server.listen(serverPort);

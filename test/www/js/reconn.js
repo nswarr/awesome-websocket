@@ -1,7 +1,8 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"Focm2+":[function(require,module,exports){
 module.exports = require("./src/reconnecting-websocket.js");
+module.exports.HuntingWebSocket = require("./src/hunting-websocket.litcoffee");
 
-},{"./src/reconnecting-websocket.js":11}],"reconnecting-websocket":[function(require,module,exports){
+},{"./src/hunting-websocket.litcoffee":11,"./src/reconnecting-websocket.js":12}],"reconnecting-websocket":[function(require,module,exports){
 module.exports=require('Focm2+');
 },{}],3:[function(require,module,exports){
 if (typeof Object.create === 'function') {
@@ -2709,6 +2710,118 @@ function ws(uri, protocols, opts) {
 if (WebSocket) ws.prototype = WebSocket.prototype;
 
 },{}],11:[function(require,module,exports){
+var HuntingWebSocket, ReconnectingWebSocket, WebSocket;
+
+ReconnectingWebSocket = require('./reconnecting-websocket.js').ReconnectingWebSocket;
+
+WebSocket = WebSocket || require('ws');
+
+HuntingWebSocket = (function() {
+  function HuntingWebSocket(urls) {
+    var openAtAll, socket, url, _i, _len, _ref;
+    this.urls = urls;
+    openAtAll = false;
+    this.currSocket = void 0;
+    this.huntIndex = 0;
+    this.pendingMessages = [];
+    this.sockets = [];
+    _ref = this.urls;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      url = _ref[_i];
+      socket = new ReconnectingWebSocket(url);
+      this.sockets.push(socket);
+      socket.onmessage = (function(_this) {
+        return function(evt) {
+          return _this.onmessage(evt);
+        };
+      })(this);
+      socket.onerror = (function(_this) {
+        return function(err) {
+          return _this.onerror(err);
+        };
+      })(this);
+      socket.onopen = (function(_this) {
+        return function(evt) {
+          if (!openAtAll) {
+            openAtAll = true;
+            _this.currSocket = socket;
+            _this.onopen(evt);
+          }
+          _this.onconnectionopen(socket.underlyingWs.url);
+          return _this.processPendingMessages();
+        };
+      })(this);
+      socket.onreconnect = (function(_this) {
+        return function(evt) {
+          _this.onreconnect(evt);
+          return _this.processPendingMessages();
+        };
+      })(this);
+      socket.ondatanotsent = (function(_this) {
+        return function(evt) {
+          console.log("datanotsent: ");
+          console.log(evt);
+          console.log(evt.data);
+          _this.pendingMessages.push(evt.data);
+          if (++_this.huntIndex >= _this.sockets.length) {
+            _this.huntIndex = 0;
+          }
+          return _this.currSocket = _this.sockets[_this.huntIndex];
+        };
+      })(this);
+    }
+  }
+
+  HuntingWebSocket.prototype.send = function(data) {
+    if (this.currSocket) {
+      console.log("sending");
+      this.currSocket.send(data);
+    } else {
+      console.log("queueing");
+      this.pendingMessages.push(data);
+    }
+    return console.log(data);
+  };
+
+  HuntingWebSocket.prototype.processPendingMessages = function() {
+    var message, _results;
+    _results = [];
+    while (message = this.pendingMessages.shift()) {
+      _results.push(this.send(message));
+    }
+    return _results;
+  };
+
+  HuntingWebSocket.prototype.close = function() {
+    var socket, _i, _len, _ref;
+    _ref = this.sockets;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      socket = _ref[_i];
+      socket.close();
+    }
+    return this.onclose();
+  };
+
+  HuntingWebSocket.prototype.onopen = function(event) {};
+
+  HuntingWebSocket.prototype.onreconnect = function(event) {};
+
+  HuntingWebSocket.prototype.onclose = function(event) {};
+
+  HuntingWebSocket.prototype.onmessage = function(event) {};
+
+  HuntingWebSocket.prototype.onerror = function(event) {};
+
+  HuntingWebSocket.prototype.onconnectionopen = function(event) {};
+
+  return HuntingWebSocket;
+
+})();
+
+module.exports = HuntingWebSocket;
+
+
+},{"./reconnecting-websocket.js":12,"ws":10}],12:[function(require,module,exports){
 (function (global){
 log = require('simplog');
 
@@ -2735,9 +2848,7 @@ function sender(data){
   // error
   if (this.underlyingWs == null || this.underlyingWs.readyState != OriginalWebSocket.OPEN){
     log.info("this.underlyingWs not open, reconnecting");
-    var e = new MessageEvent('datanotsent');
-    e.data = data;
-    this.ondatanotsent(e);
+    this.ondatanotsent({type:"datanotsent", data:data});
     this.reconnect();
   } else {
     // otherwise we try to send, and if we have a failure
@@ -2749,9 +2860,7 @@ function sender(data){
       return true; //sent
     } catch (error) {
       log.error("error during send on this.underlyingWs", e);
-      var e = new MessageEvent('datanotsent');
-      e.data = data;
-      this.ondatanotsent(e);
+      this.ondatanotsent({type:"datanotsent", data:data});
       this.reconnect();
     }
   }

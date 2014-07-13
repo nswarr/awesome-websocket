@@ -18,7 +18,7 @@ that is the only time the socket has activity to 'know' it switched servers.
     ReconnectingWebSocket = require('./reconnecting-websocket.js').ReconnectingWebSocket
     WebSocket = WebSocket or require('ws')
 
-    class HuntingWebsocket
+    class HuntingWebSocket
       constructor: (@urls) ->
         openAtAll = false
         @currSocket = undefined
@@ -38,11 +38,12 @@ to hookup each time we reopen.
           socket.onerror = (err) =>
             @onerror err
           socket.onopen = (evt) =>
-            @processPendingMessages()
             if not openAtAll
               openAtAll = true
               @currSocket = socket
               @onopen evt
+            @onconnectionopen socket.underlyingWs.url
+            @processPendingMessages()
           socket.onreconnect = (evt) =>
             @onreconnect evt
             @processPendingMessages()
@@ -51,17 +52,27 @@ to hookup each time we reopen.
 If there was a problem sending this message, let's try another socket
 
           socket.ondatanotsent = (evt) =>
-            @pendingMessages.push evt
+            console.log("datanotsent: ")
+            console.log(evt)
+            console.log(evt.data)
+            @pendingMessages.push evt.data
             if ++@huntIndex >= @sockets.length
               @huntIndex = 0
             @currSocket = @sockets[@huntIndex]
       
 
       send: (data) ->
-        @currSocket.send data
+        if @currSocket
+          console.log("sending")
+          @currSocket.send data
+        else
+          console.log("queueing")
+          @pendingMessages.push data
+        console.log(data)
 
-      processPendingMessages: () =>
-            @send(message) for message in @pendingMessages
+      processPendingMessages: () ->
+        while message = @pendingMessages.shift()
+          @send(message)
 
 Close all the sockets.
 
@@ -76,10 +87,10 @@ the debugger.
       onopen: (event) ->
       onreconnect: (event) ->
       onclose: (event) ->
-      onserver: (event) ->
       onmessage: (event) ->
       onerror: (event) ->
+      onconnectionopen: (event) ->
 
 Publish this object for browserify.
 
-    module.exports = HuntingWebsocket
+    module.exports = HuntingWebSocket

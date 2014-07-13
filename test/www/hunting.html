@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+
+<html lang="en" ng-app='theApp'>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
+  <title>reconnecting websocket tests</title>
+  <script src="//code.jquery.com/qunit/qunit-1.14.0.js"></script>
+  <script type="text/javascript">
+    window.debug = true;
+  </script>
+  <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/lodash.js"> </script>
+  <script type="text/javascript">
+    var HuntingWebSocket = require("reconnecting-websocket").HuntingWebSocket;
+    var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket
+    var Q = require('q');
+
+    QUnit.asyncTest('reconnect controlled', function(assert) {
+      expect(3);
+      var testWs = new HuntingWebSocket([
+        "ws://localhost:8081/socket",
+        "ws://localhost:8082/socket",
+        "ws://localhost:8083/socket",
+        "ws://localhost:8084/socket"
+      ]);
+      var controllingWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
+      controllingWs.gotPid = Q.defer();
+
+      function onOpen(evt) {
+        this.send("what's your pid");
+      };
+
+      function messageHandler(evt) {
+        var data = evt.data;
+        try {
+          data = JSON.parse(evt.data);
+          if (data.pid){
+            this.pid = data.pid;
+          }
+          this.gotPid.resolve();
+        } catch (e) {
+        }
+      };
+
+      controllingWs.onopen = onOpen.bind(controllingWs);
+      controllingWs.onmessage = messageHandler.bind(controllingWs);
+      
+      testWs.onconnectionopen = _.after(4, function() {
+        assert.ok(true, "all connected");
+        QUnit.start();
+      });
+
+      testWs.onopen = function(){
+        console.log("opened");
+        assert.ok(true, "opened");
+      };
+      testWs.onmessage = function(message){ 
+        try{
+          message = JSON.parse(message);
+          if ( message.type === "echo" && message.echoThis === "sent before sockets up" ){
+            assert.ok(true, "message sent before sockets were up, arrived");
+          }
+        } catch(e) {}
+      }
+      // this send will 'fail' until the servers start
+      testWs.send('{"type": "echo", "echoThis": "sent before sockets up"}');
+      controllingWs.gotPid.promise.then(function(){
+        controllingWs.send(JSON.stringify({type: "start", port: 8081}));
+        controllingWs.send(JSON.stringify({type: "start", port: 8082}));
+        controllingWs.send(JSON.stringify({type: "start", port: 8083}));
+        controllingWs.send(JSON.stringify({type: "start", port: 8084}));
+      });
+
+    });
+
+  </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+</body>
+</html>
