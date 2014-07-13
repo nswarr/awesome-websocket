@@ -2763,7 +2763,8 @@ HuntingWebSocket = (function() {
           if (++_this.huntIndex >= _this.sockets.length) {
             _this.huntIndex = 0;
           }
-          return _this.currSocket = _this.sockets[_this.huntIndex];
+          _this.currSocket = _this.sockets[_this.huntIndex];
+          return _this.ondatanotsent(evt);
         };
       })(this);
     }
@@ -2807,6 +2808,8 @@ HuntingWebSocket = (function() {
   HuntingWebSocket.prototype.onerror = function(event) {};
 
   HuntingWebSocket.prototype.onconnectionopen = function(event) {};
+
+  HuntingWebSocket.prototype.ondatanotsent = function(event) {};
 
   return HuntingWebSocket;
 

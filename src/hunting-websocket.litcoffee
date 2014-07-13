@@ -56,6 +56,7 @@ If there was a problem sending this message, let's try another socket
             if ++@huntIndex >= @sockets.length
               @huntIndex = 0
             @currSocket = @sockets[@huntIndex]
+            @ondatanotsent evt
       
 
       send: (data) ->
@@ -84,6 +85,7 @@ the debugger.
       onmessage: (event) ->
       onerror: (event) ->
       onconnectionopen: (event) ->
+      ondatanotsent: (event) ->
 
 Publish this object for browserify.
 

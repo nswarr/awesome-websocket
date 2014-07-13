@@ -18,7 +18,7 @@
     var Q = require('q');
 
     QUnit.asyncTest('reconnect controlled', function(assert) {
-      expect(3);
+      expect(4);
       var testWs = new HuntingWebSocket([
         "ws://localhost:8081/socket",
         "ws://localhost:8082/socket",
@@ -53,9 +53,12 @@
       });
 
       testWs.onopen = function(){
-        console.log("opened");
         assert.ok(true, "opened");
       };
+      testWs.ondatanotsent = _.once(function(me){
+        var data = JSON.parse(me.data);
+        assert.equal(data.echoThis, "sent before sockets up", "datanotsent before sockets up");
+      });
       testWs.onmessage = function(message){ 
         try{
           message = JSON.parse(message.data);
