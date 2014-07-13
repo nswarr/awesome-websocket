@@ -2759,9 +2759,6 @@ HuntingWebSocket = (function() {
       })(this);
       socket.ondatanotsent = (function(_this) {
         return function(evt) {
-          console.log("datanotsent: ");
-          console.log(evt);
-          console.log(evt.data);
           _this.pendingMessages.push(evt.data);
           if (++_this.huntIndex >= _this.sockets.length) {
             _this.huntIndex = 0;
@@ -2774,13 +2771,10 @@ HuntingWebSocket = (function() {
 
   HuntingWebSocket.prototype.send = function(data) {
     if (this.currSocket) {
-      console.log("sending");
-      this.currSocket.send(data);
+      return this.currSocket.send(data);
     } else {
-      console.log("queueing");
-      this.pendingMessages.push(data);
+      return this.pendingMessages.push(data);
     }
-    return console.log(data);
   };
 
   HuntingWebSocket.prototype.processPendingMessages = function() {

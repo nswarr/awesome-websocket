@@ -52,9 +52,6 @@ to hookup each time we reopen.
 If there was a problem sending this message, let's try another socket
 
           socket.ondatanotsent = (evt) =>
-            console.log("datanotsent: ")
-            console.log(evt)
-            console.log(evt.data)
             @pendingMessages.push evt.data
             if ++@huntIndex >= @sockets.length
               @huntIndex = 0
@@ -63,12 +60,9 @@ If there was a problem sending this message, let's try another socket
 
       send: (data) ->
         if @currSocket
-          console.log("sending")
           @currSocket.send data
         else
-          console.log("queueing")
           @pendingMessages.push data
-        console.log(data)
 
       processPendingMessages: () ->
         while message = @pendingMessages.shift()
