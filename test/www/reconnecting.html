@@ -58,10 +58,11 @@
       };
       var closeAfterMessages = _.after(2, ws.close);
       ws.onmessage = function(message){
-        if (message.data === "connected"){
+        message = JSON.parse(message.data);
+        if (message.type === "connected"){
           assert.ok(true, 'received connected message');
-        } else {
-          assert.ok(message.data === "pong", 'received message');
+        } else if (message.type === "pong") {
+          assert.ok(true, 'received pong');
         }
         closeAfterMessages(); 
       };

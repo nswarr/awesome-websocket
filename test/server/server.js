@@ -5,6 +5,7 @@ var http            = require('http');
 var path            = require('path');
 var statichandler   = require('serve-static');
 var errorhandler    = require('errorhandler');
+var log             = require('simplog');
 
 var app = express();
 app.use(errorhandler());
@@ -18,21 +19,31 @@ var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({server: server, path: "/socket"});
 var serverPort = Number(process.env.PORT || 8080)
 
+
 wss.on('connection', function(ws) {
   ws.on('message', function(message) {
+    function sendMessage(type, data){
+      if ( typeof(type) === "object" ){
+        ws.send(JSON.stringify(type));
+      } else if ( data ) {
+        ws.send(JSON.stringify({type: type, data: data}));
+      } else {
+        ws.send(JSON.stringify({type: type}));
+      }
+    }
     console.log("handling: " + message); 
     if ( message === "ping" ){
-      console.log("pongin'");
-      ws.send("pong");
+      log.info("pongin'");
+      sendMessage("pong");
     } else if ( message === "die" ){
-      console.log("et, tu, Brute?");
+      log.info("et, tu, Brute?");
       process.exit(1);
     } else if ( message === "what's your pid" ){
-      ws.send(JSON.stringify({pid: process.pid}));
+      sendMessage(JSON.stringify({pid: process.pid}));
     } else if ( message === "what's your port" ){
-      ws.send(JSON.stringify({port: serverPort}));
+      sendMessage(JSON.stringify({port: serverPort}));
     } else if ( JSON.parse(message) === null ){
-      console.log("null message!");
+      log.info("null message!");
     } else {
       var action = JSON.parse(message);
       if ( action.type === "kill" ){
@@ -43,16 +54,14 @@ wss.on('connection', function(ws) {
         } 
       } else if ( action.type === "start" ){
         var worker = cluster.fork({PORT: action.port});
-        ws.send(JSON.stringify(
-          { type: "started", pid: worker.process.pid }
-        ));
+        sendMessage( { type: "started", pid: worker.process.pid });
       } else if ( action.type === "echo" ){
-        console.log("echoing: " + message);
-        ws.send(JSON.stringify(action));
+        log.info("echoing: " + message);
+        sendMessage(action);
       }
     }
   });
-  ws.send('connected');
+  ws.send(JSON.stringify({type: 'connected'}));
 });
 
 server.listen(serverPort);
