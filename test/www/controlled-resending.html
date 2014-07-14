@@ -19,7 +19,7 @@
 
     QUnit.asyncTest('reconnect controlled', function(assert) {
       expect(3);
-      var testWs = new ReconnectingResendingWebSocket("ws://localhost:8081/socket");
+      var testWs = new ReconnectingResendingWebSocket("ws://localhost:8082/socket");
       var controllingWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
       testWs.gotPid        = Q.defer();
       controllingWs.gotPid = Q.defer();
@@ -44,7 +44,7 @@
       controllingWs.onopen = onOpen.bind(controllingWs);
       controllingWs.onmessage = messageHandler.bind(controllingWs);
       controllingWs.gotPid.promise.then(function(){
-        controllingWs.send(JSON.stringify({type: "start", port: 8081}));
+        controllingWs.send(JSON.stringify({type: "start", port: 8082}));
       });
 
       testWs.onopen = function(){

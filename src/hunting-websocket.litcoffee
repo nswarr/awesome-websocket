@@ -25,6 +25,7 @@ that is the only time the socket has activity to 'know' it switched servers.
         @huntIndex = 0
         @pendingMessages = []
         @sockets = []
+        @closed = false
         for url in @urls
           socket = new ReconnectingWebSocket(url)
           @sockets.push socket
@@ -42,11 +43,9 @@ to hookup each time we reopen.
               openAtAll = true
               @currSocket = socket
               @onopen evt
-            @onconnectionopen socket.underlyingWs.url
-            @processPendingMessages()
+            @onconnectionopen url
           socket.onreconnect = (evt) =>
             @onreconnect evt
-            @processPendingMessages()
             
 
 If there was a problem sending this message, let's try another socket
@@ -57,17 +56,27 @@ If there was a problem sending this message, let's try another socket
               @huntIndex = 0
             @currSocket = @sockets[@huntIndex]
             @ondatanotsent evt
-      
 
       send: (data) ->
-        if @currSocket
-          @currSocket.send data
-        else
-          @pendingMessages.push data
+        if data
+          if @currSocket
+            senttoMessageData =
+              url: @currSocket.underlyingWs.url
+              data: data
+            @onsentto(new MessageEvent('onsentto', data: senttoMessageData))
+            @currSocket.send data
+          else
+            @pendingMessages.push data
+        @processPendingMessages()
 
       processPendingMessages: () ->
-        while message = @pendingMessages.shift()
-          @send(message)
+        return if @scheduled or @closed
+        processMessages = () =>
+          while message = @pendingMessages.shift()
+            @send(message)
+          @scheduled = undefined
+        @scheduled = setTimeout processMessages, 500
+
 
 Close all the sockets.
 
@@ -86,6 +95,7 @@ the debugger.
       onerror: (event) ->
       onconnectionopen: (event) ->
       ondatanotsent: (event) ->
+      onsentto: (event) ->
 
 Publish this object for browserify.
 

@@ -30,10 +30,11 @@ function sender(data){
     // we'll go ahead and reconnect, telling our caller
     // all about how we failed via onsendfailed
     try {
-      log.info("sending: ", data);
+      log.debug("sending to(%s) : %j", this.underlyingWs.url, data);
       this.underlyingWs.send(data);
       return true; //sent
     } catch (error) {
+      log.error(error);
       this.ondatanotsent(new MessageEvent("datanotsent", {data:data}));
       this.reconnect();
     }
@@ -60,7 +61,7 @@ function ReconnectingWebSocket(url, protocols){
   this.onreconnect = function () {};
 
   this.reconnect = function() {
-    log.info("reconnecting");
+    log.debug("reconnecting: ", url);
     if ( readyState === OriginalWebSocket.CONNECTING ||
          readyState === RECONNECTING || 
          (this.underlyingWs != null && this.underlyingWs.readyState === OriginalWebSocket.CONNECTING ))

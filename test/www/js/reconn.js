@@ -2725,6 +2725,7 @@ HuntingWebSocket = (function() {
     this.huntIndex = 0;
     this.pendingMessages = [];
     this.sockets = [];
+    this.closed = false;
     _ref = this.urls;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       url = _ref[_i];
@@ -2747,14 +2748,12 @@ HuntingWebSocket = (function() {
             _this.currSocket = socket;
             _this.onopen(evt);
           }
-          _this.onconnectionopen(socket.underlyingWs.url);
-          return _this.processPendingMessages();
+          return _this.onconnectionopen(url);
         };
       })(this);
       socket.onreconnect = (function(_this) {
         return function(evt) {
-          _this.onreconnect(evt);
-          return _this.processPendingMessages();
+          return _this.onreconnect(evt);
         };
       })(this);
       socket.ondatanotsent = (function(_this) {
@@ -2771,20 +2770,39 @@ HuntingWebSocket = (function() {
   }
 
   HuntingWebSocket.prototype.send = function(data) {
-    if (this.currSocket) {
-      return this.currSocket.send(data);
-    } else {
-      return this.pendingMessages.push(data);
+    var senttoMessageData;
+    if (data) {
+      if (this.currSocket) {
+        senttoMessageData = {
+          url: this.currSocket.underlyingWs.url,
+          data: data
+        };
+        this.onsentto(new MessageEvent('onsentto', {
+          data: senttoMessageData
+        }));
+        this.currSocket.send(data);
+      } else {
+        this.pendingMessages.push(data);
+      }
     }
+    return this.processPendingMessages();
   };
 
   HuntingWebSocket.prototype.processPendingMessages = function() {
-    var message, _results;
-    _results = [];
-    while (message = this.pendingMessages.shift()) {
-      _results.push(this.send(message));
+    var processMessages;
+    if (this.scheduled || this.closed) {
+      return;
     }
-    return _results;
+    processMessages = (function(_this) {
+      return function() {
+        var message;
+        while (message = _this.pendingMessages.shift()) {
+          _this.send(message);
+        }
+        return _this.scheduled = void 0;
+      };
+    })(this);
+    return this.scheduled = setTimeout(processMessages, 500);
   };
 
   HuntingWebSocket.prototype.close = function() {
@@ -2810,6 +2828,8 @@ HuntingWebSocket = (function() {
   HuntingWebSocket.prototype.onconnectionopen = function(event) {};
 
   HuntingWebSocket.prototype.ondatanotsent = function(event) {};
+
+  HuntingWebSocket.prototype.onsentto = function(event) {};
 
   return HuntingWebSocket;
 
@@ -2852,10 +2872,11 @@ function sender(data){
     // we'll go ahead and reconnect, telling our caller
     // all about how we failed via onsendfailed
     try {
-      log.info("sending: ", data);
+      log.debug("sending to(%s) : %j", this.underlyingWs.url, data);
       this.underlyingWs.send(data);
       return true; //sent
     } catch (error) {
+      log.error(error);
       this.ondatanotsent(new MessageEvent("datanotsent", {data:data}));
       this.reconnect();
     }
@@ -2882,7 +2903,7 @@ function ReconnectingWebSocket(url, protocols){
   this.onreconnect = function () {};
 
   this.reconnect = function() {
-    log.info("reconnecting");
+    log.debug("reconnecting: ", url);
     if ( readyState === OriginalWebSocket.CONNECTING ||
          readyState === RECONNECTING || 
          (this.underlyingWs != null && this.underlyingWs.readyState === OriginalWebSocket.CONNECTING ))
