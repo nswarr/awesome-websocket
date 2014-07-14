@@ -17,27 +17,25 @@
     var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket;
     var Q = require('q');
 
-    QUnit.asyncTest('reconnect controlled', function(assert) {
+    QUnit.asyncTest('message sent while disonnected makes it through', function(assert) {
       expect(3);
       var testWs = new ReconnectingResendingWebSocket("ws://localhost:8082/socket");
       var controllingWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
       testWs.gotPid        = Q.defer();
       controllingWs.gotPid = Q.defer();
+      serverDead           = Q.defer();
 
       function onOpen(evt) {
         this.send("what's your pid");
       };
 
       function messageHandler(evt) {
-        var data = evt.data;
-        console.log(evt.data);
-        try {
-          data = JSON.parse(evt.data);
-          if (data.pid){
-            this.pid = data.pid;
-            this.gotPid.resolve();
-          }
-        } catch (e) {
+        data = JSON.parse(evt.data);
+        if (data.pid){
+          this.pid = data.pid;
+          this.gotPid.resolve();
+        } else if ( data.type === "dead" && data.childPort === 8082){
+          serverDead.resolve();
         }
       };
 
@@ -55,15 +53,18 @@
         assert.ok(true, 'closed');
         QUnit.start(); 
       }
-      testWs.send('{"type":"echo", "echoThis":"please"}');
+      serverDead.promise.then(function(){
+        // send the message to a dead server
+        testWs.send('{"type":"echo", "echoThis":"please"}');
+        // restart
+        controllingWs.send(JSON.stringify({type: "start", port: 8082}));
+      });
+      
       testWs.onmessage = function(message){
-        try{
-          var mo = JSON.parse(message.data);
-          if ( mo.type === "echo" ){
-            assert.ok(mo.echoThis === "please", "message");
-            testWs.close();
-          }
-        } catch(e) { 
+        var mo = JSON.parse(message.data);
+        if ( mo.type === "echo" ){
+          assert.ok(mo.echoThis === "please", "message");
+          testWs.close();
         }
       }
 

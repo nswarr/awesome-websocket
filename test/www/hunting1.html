@@ -89,7 +89,6 @@
       });
 
       controllingWs.gotPid.promise.then(function(){
-        console.log("damn hell shit");
         controllingWs.startServerOnPort(8085);
         controllingWs.startServerOnPort(8086);
         Q.all([
