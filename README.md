@@ -181,8 +181,8 @@ You can also opt to have it replace the native WebSocket, a polyfill if you will
 </script>
 ```
 
-The hunting websocket is so unlike anything else, that there's no likely way to
-polyfil it.  So he's a little more basic.
+The hunting websocket is so unlike anything else, it seems unlikely that a polyfill
+would be valuable, so he's a little more basic.
 
 ```html
 <script src="js/reconn.js"></script>
