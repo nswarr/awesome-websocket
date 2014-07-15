@@ -19,7 +19,7 @@
     var controllingWs = new SocketServerController(8080);
 
     QUnit.asyncTest('message to dead server goes to next', function(assert) {
-      expect(1);
+      expect(2);
       var serverOne, serverTwo;
       var testWs = new HuntingWebSocket([
         "ws://localhost:8085/socket",
@@ -36,16 +36,17 @@
           gotMessageTwo.resolve();
         }
       }
+      // actual sending could take some number of tries... we just want to 
+      // make sure it comes through here
+      assertMessageTwoContents = _.once(function(data){
+        assert.equal("message two", data.echoThis, "message not sent");
+      });
       testWs.ondatanotsent = function(evt) {
-        console.log("not sent");
+        data = JSON.parse(evt.data);
+        if ( data.echoThis === "message two" ){
+          assertMessageTwoContents(data);
+        }
       }
-      testWs.onsentto = function(evt){
-        console.log("sent");
-      }
-      testWs.onconnectionopen = function(url) {
-        console.log("opened: " + url);
-      }
-      
 
       function sendMessageOne(){
         console.log("sending message one");
@@ -65,9 +66,11 @@
         serverTwo = controllingWs.start(8086);
         Q.all([ serverOne.started.promise, serverTwo.started.promise ])
         .then(sendMessageOne);
+        // kill the server the test socket is connected to 
         gotMessageOne.promise.then(function() { testWs.send("die"); });
         gotMessageTwo.promise.then(function(){
           assert.ok(true, "received message two");
+          //clean up the test servers
           controllingWs.kill(8085).kill(8086);
           testWs.close();
           QUnit.start();
