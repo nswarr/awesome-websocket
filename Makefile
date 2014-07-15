@@ -1,18 +1,11 @@
-.PHONY: test watch run-server clean
+.PHONY: watch clean run-server
 
-build: ./node_modules
-	mkdir -p test/www/js
-	./node_modules/.bin/browserify -r q -r ./index.js:ws-additions --outfile test/www/js/reconn.js
+watch:
+	cd test && $(MAKE) watch
 
-watch: build
-	PORT=8080 DEBUG=true ./node_modules/.bin/supervisor -i test/www -e ".litcoffee|.coffee|.js" --exec make run-server
-
-
-run-server: build
+run-server: 
 	test/server/server.js
-
-./node_modules:
-	npm install .
 
 clean:
 	rm -rf ./node_modules
+	rm -rf ./test/node_modules

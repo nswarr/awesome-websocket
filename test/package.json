@@ -12,6 +12,7 @@
   "dependencies": {
     "ws-additions": "*",
     "supervisor": "^0.6.0",
-    "browserify": "^4.2.0"
+    "browserify": "^4.2.0",
+    "q": "^1.0.1"
   }
 }
