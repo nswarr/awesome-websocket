@@ -2,7 +2,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 module.exports = require("./src/reconnecting-websocket.js");
 module.exports.HuntingWebSocket = require("./src/hunting-websocket.litcoffee");
 
-},{"./src/hunting-websocket.litcoffee":11,"./src/reconnecting-websocket.js":12}],"reconnecting-websocket":[function(require,module,exports){
+},{"./src/hunting-websocket.litcoffee":11,"./src/reconnecting-websocket.js":12}],"ws-additions":[function(require,module,exports){
 module.exports=require('Focm2+');
 },{}],3:[function(require,module,exports){
 if (typeof Object.create === 'function') {

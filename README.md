@@ -158,7 +158,7 @@ You can also opt to have it replace the native WebSocket, a polyfill if you will
 ```html
 <script src="js/reconn.js"></script>
 <script>
-  require("reconnecting-websocket").MakeWebSocketReconnecting();
+  require("ws-additions").MakeWebSocketReconnecting();
   // now all your calls to new WebSocket will return 
   // ReconnectingWebSockets!
   var ws = new WebSocket("ws://localhost:8080/socket")
@@ -171,7 +171,7 @@ You can also opt to have it replace the native WebSocket, a polyfill if you will
 ```html
 <script src="js/reconn.js"></script>
 <script>
-  require("reconnecting-websocket").MakeWebSocketReconnectingAndResending();
+  require("ws-additions").MakeWebSocketReconnectingAndResending();
   // now all your calls to new WebSocket will return 
   // ReconnectingResendingWebSockets!
   var ws = new WebSocket("ws://localhost:8080/socket")
@@ -187,7 +187,7 @@ would be valuable, so he's a little more basic.
 ```html
 <script src="js/reconn.js"></script>
 <script>
-    var HuntingWebSocket = require("reconnecting-websocket").HuntingWebSocket;
+    var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
     var testWs = new HuntingWebSocket([
       "ws://localhost:8085/socket",
       "ws://localhost:8086/socket"

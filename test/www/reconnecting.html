@@ -13,7 +13,7 @@
   <script type="text/javascript" src="js/reconn.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
-    var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket;
+    var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
 
     QUnit.asyncTest('connect on create', function(assert) {
       expect(2);

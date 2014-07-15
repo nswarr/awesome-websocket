@@ -1,7 +1,7 @@
 function SocketServerController(port){
   this.port = port;
   this.servers = {};
-  var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket;
+  var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
   var ws = new ReconnectingWebSocket("ws://localhost:" + this.port + "/socket");
   this.connected = Q.defer();
 

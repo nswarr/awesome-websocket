@@ -15,7 +15,7 @@
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
     var Q = require('q');
-    var ReconnectingResendingWebSocket = require("reconnecting-websocket").ReconnectingResendingWebSocket;
+    var ReconnectingResendingWebSocket = require("ws-additions").ReconnectingResendingWebSocket;
 
     QUnit.asyncTest('message sent while disonnected makes it through', function(assert) {
       expect(3);

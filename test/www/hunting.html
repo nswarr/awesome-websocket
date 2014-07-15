@@ -15,7 +15,7 @@
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
     var Q = require('q');
-    var HuntingWebSocket = require("reconnecting-websocket").HuntingWebSocket;
+    var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
     var controllingWs = new SocketServerController(8080);
 
     QUnit.asyncTest('message to dead server goes to next', function(assert) {
