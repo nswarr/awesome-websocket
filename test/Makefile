@@ -5,7 +5,7 @@ build: ./node_modules ../node_modules
 	./node_modules/.bin/browserify -r q -r ws-additions --outfile test/www/js/reconn.js
 
 watch: build
-	cd .. && PORT=8080 DEBUG=true ./node_modules/.bin/supervisor -i test/www -e ".litcoffee|.coffee|.js" --exec make run-server
+	cd .. && PORT=8080 DEBUG=true ./test/node_modules/.bin/supervisor -i test/www -e ".litcoffee|.coffee|.js" --exec make run-server
 
 
 run-server: build
