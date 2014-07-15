@@ -25,9 +25,9 @@ it's good to have the socket just pickup as if the server were never gone.
 * Resending - as a consumer of a WebSocket enabled service, it'd sure be nice if
 when you say ws.send('my message') that the message will go, even if the socket
 isn't connected when you call 'send'.
-* Hunting ( future ) - given a list of hosts, find the fastest available and use
-it.  Of course, if a problem is encountered with a 'connected' host drop it like
-a ton of bricks and go find the new 'best one'.
+* Hunting - given a list of hosts, connect to them and send messages to which
+ever one is available, switching to another if the 'active' connection becomes
+unavailable.  Dumb-as-dirt client side fail over.
 
 ### ASSumptions
 It turns out we can make some assumptions in this whole process that make development
@@ -52,7 +52,13 @@ cd ws-additions/
 make watch
 ```
 
-Once you've done that successfully you should find a test page at `http://localhost:8080/index.html`
+Once you've done that successfully you should find a test pages at 
+  * `http://localhost:8080/index.html`
+  * `http://localhost:8080/hunting.html`
+  * `http://localhost:8080/controlled.html`
+  * `http://localhost:8080/controlled-resending.html`
+A bunch of these tests blow up the server ( by design ) so it's hard to get them
+all to run at the same time ( hence the multiple pages ).
 
 ### Usage!
 This package makes an object that looks a fair bit like a WebSocket available 
@@ -175,3 +181,17 @@ You can also opt to have it replace the native WebSocket, a polyfill if you will
 </script>
 ```
 
+The hunting websocket is so unlike anything else, that there's no likely way to
+polyfil it.  So he's a little more basic.
+
+```html
+<script src="js/reconn.js"></script>
+<script>
+    var HuntingWebSocket = require("reconnecting-websocket").HuntingWebSocket;
+    var testWs = new HuntingWebSocket([
+      "ws://localhost:8085/socket",
+      "ws://localhost:8086/socket"
+    ]);
+    testWs.send("this message is AWESOME!");
+</script>
+```
