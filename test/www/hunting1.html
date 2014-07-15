@@ -11,42 +11,16 @@
     window.debug = true;
   </script>
   <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/server_controller.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
     var Q = require('q');
-    var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket
     var HuntingWebSocket = require("reconnecting-websocket").HuntingWebSocket;
-    var controllingWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
-    controllingWs.children = {};
-    controllingWs.gotPid = Q.defer();
-    controllingWs.onmessage = function (evt) {
-      data = JSON.parse(evt.data);
-      if (data.type === "connected" ){
-        this.pid = data.pid;
-        this.gotPid.resolve();
-      } else if ( data.type === "started" ) {
-        this.children[data.childPort].started.resolve();
-      } else if ( data.type === "dead" ){
-        this.children[data.childPort].stopped.resolve();
-      }
-    }.bind(controllingWs);
-    controllingWs.startServerOnPort = function(port){
-      this.children[port] = {started: Q.defer(), stopped: Q.defer()};
-      this.send(JSON.stringify({type: "start", port: port}));
-    }.bind(controllingWs);
-    controllingWs.killServerOnPort = function(port){
-      this.send(JSON.stringify({type:"kill", port:port}));
-    }.bind(controllingWs);
+    var controllingWs = new SocketServerController(8080);
 
-    controllingWs.onopen = function (evt) { controllingWs.send("what's your pid"); };
     QUnit.asyncTest('message to dead server goes to next', function(assert) {
       expect(1);
-      var allDone = Q.defer();
-      var deadPort = undefined, isDead = Q.defer();
-      var connections = {
-        8086: {started: Q.defer(), stopped: Q.defer()},
-        8085: {started: Q.defer(), stopped: Q.defer()}
-      };
+      var serverOne, serverTwo;
       var testWs = new HuntingWebSocket([
         "ws://localhost:8085/socket",
         "ws://localhost:8086/socket"
@@ -58,8 +32,6 @@
         var message = JSON.parse(message.data);
         if ( message.type === "echo" && message.echoThis === "message one"){
           gotMessageOne.resolve();
-        } else if ( message.type === "connected" ){
-          connections[message.port].started.resolve(); 
         } else if ( message.type === "echo" && message.echoThis === "message two"){
           gotMessageTwo.resolve();
         }
@@ -79,8 +51,8 @@
         console.log("sending message one");
         testWs.send(JSON.stringify({type: "echo", echoThis: "message one"}));
         // we'll send the second message whenever a server dies
-        controllingWs.children[8085].stopped.promise.then(sendMessageTwo);
-        controllingWs.children[8086].stopped.promise.then(sendMessageTwo);
+        serverOne.stopped.promise.then(sendMessageTwo);
+        serverTwo.stopped.promise.then(sendMessageTwo);
       }
       
       var sendMessageTwo = _.once(function(){
@@ -88,19 +60,16 @@
         testWs.send(JSON.stringify({type: "echo", echoThis: "message two"}));
       });
 
-      controllingWs.gotPid.promise.then(function(){
-        controllingWs.startServerOnPort(8085);
-        controllingWs.startServerOnPort(8086);
-        Q.all([
-            connections[8085].started.promise,
-            connections[8086].started.promise
-        ])
+      controllingWs.connected.promise.then(function(){
+        serverOne = controllingWs.start(8085);
+        serverTwo = controllingWs.start(8086);
+        Q.all([ serverOne.started.promise, serverTwo.started.promise ])
         .then(sendMessageOne);
         gotMessageOne.promise.then(function() { testWs.send("die"); });
         gotMessageTwo.promise.then(function(){
           assert.ok(true, "received message two");
+          controllingWs.kill(8085).kill(8086);
           testWs.close();
-          controllingWs.send("die");
           QUnit.start();
         });
       }).fail(function(e){console.log(e); });

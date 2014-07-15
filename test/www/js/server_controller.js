@@ -38,5 +38,5 @@ function SocketServerController(port){
     return this.servers[port];
   }.bind(this);
 
-  this.kill = function(port){ this.sendMessage({type: "kill", port: port}); }.bind(this);
+  this.kill = function(port){ this.sendMessage({type: "kill", port: port}); return this;}.bind(this);
 }
