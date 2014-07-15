@@ -77,5 +77,8 @@ wss.on('connection', function(ws) {
   });
   ws.send(JSON.stringify({pid: process.pid, type: 'connected', port: serverPort}));
 });
-
+process.on('uncaughtException', function (e){
+  console.log("ouch, exception port " + serverPort);
+  console.log(e.stack);
+});
 server.listen(serverPort);

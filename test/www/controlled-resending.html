@@ -13,36 +13,67 @@
   <script type="text/javascript" src="js/reconn.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
+    var Q = require('q');
     var ReconnectingResendingWebSocket = require("reconnecting-websocket").ReconnectingResendingWebSocket;
     var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket;
-    var Q = require('q');
+    function SocketServerController(port){
+      this.port = port;
+      this.servers = {};
+      var ws = new ReconnectingWebSocket("ws://localhost:" + this.port + "/socket");
+      this.connected = Q.defer();
+
+      this.sendMessage = function(message){
+        if ( typeof(message) != "string" ){
+          ws.send(JSON.stringify(message));
+        } else {
+          ws.send(message);
+        } }.bind(this);
+      this.send = this.sendMessage;
+
+      ws.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.type === "started" ){
+          this.servers[message.childPort].started.resolve();
+        } else if ( message.type === "dead" ){
+          this.servers[message.childPort].stopped.resolve();
+          delete this.servers[message.childPort]
+        } else if ( message.type === "connected" ){
+          this.connected.resolve();
+        } }.bind(this);
+
+      // kills the controlling server
+      this.die = function() { this.sendMessage("die") }.bind(this);
+
+      // starts a new server for a given port, or retuns the infor for the one
+      // we have
+      this.start = function(port) {
+        if ( this.servers[port] ){
+          return this.servers[port];
+        }
+        this.servers[port] = { started: Q.defer(), stopped: Q.defer() };
+        this.sendMessage({type: "start", port: port});
+        return this.servers[port];
+      }.bind(this);
+
+      this.kill = function(port){ this.sendMessage({type: "kill", port: port}); }.bind(this);
+    }
 
     QUnit.asyncTest('message sent while disonnected makes it through', function(assert) {
       expect(3);
       var testWs = new ReconnectingResendingWebSocket("ws://localhost:8082/socket");
-      var controllingWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
-      testWs.gotPid        = Q.defer();
-      controllingWs.gotPid = Q.defer();
-      serverDead           = Q.defer();
+      var controllingWs = new SocketServerController(8080);
+      var testServer;
 
-      function onOpen(evt) {
-        this.send("what's your pid");
-      };
-
-      function messageHandler(evt) {
-        data = JSON.parse(evt.data);
-        if (data.pid){
-          this.pid = data.pid;
-          this.gotPid.resolve();
-        } else if ( data.type === "dead" && data.childPort === 8082){
-          serverDead.resolve();
-        }
-      };
-
-      controllingWs.onopen = onOpen.bind(controllingWs);
-      controllingWs.onmessage = messageHandler.bind(controllingWs);
-      controllingWs.gotPid.promise.then(function(){
-        controllingWs.send(JSON.stringify({type: "start", port: 8082}));
+      controllingWs.connected.promise.then(function(){
+        testServer = controllingWs.start(8082);
+        // once the test server stopps, then send our message, since that's
+        // what we're testing
+        testServer.stopped.promise.then(function(){
+          // send the message to a dead server
+          testWs.send('{"type":"echo", "echoThis":"please"}');
+          // restart
+          testServer = controllingWs.start(8082);
+        });
       });
 
       testWs.onopen = function(){
@@ -51,15 +82,10 @@
       }
       testWs.onclose = function(){
         assert.ok(true, 'closed');
+        controllingWs.kill(8082);
         QUnit.start(); 
       }
-      serverDead.promise.then(function(){
-        // send the message to a dead server
-        testWs.send('{"type":"echo", "echoThis":"please"}');
-        // restart
-        controllingWs.send(JSON.stringify({type: "start", port: 8082}));
-      });
-      
+
       testWs.onmessage = function(message){
         var mo = JSON.parse(message.data);
         if ( mo.type === "echo" ){
