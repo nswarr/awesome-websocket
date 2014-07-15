@@ -78,15 +78,15 @@ interface ReconnectingWebSocket : EventTarget {
   const unsigned short CLOSED = 3;
 
   // networking
-           attribute EventHandler onopen;
-           attribute EventHandler onerror;
-           attribute EventHandler onclose;
-           attribute EventHandler onreconnect;
+          attribute EventHandler onopen;
+          attribute EventHandler onerror;
+          attribute EventHandler onclose;
+          attribute EventHandler onreconnect;
   void close([Clamp] optional unsigned short code, optional DOMString reason);
 
   // messaging
-           attribute EventHandler onmessage;
-           attribute EventHandler ondatanotsent;
+          attribute EventHandler onmessage;
+          attribute EventHandler ondatanotsent;
   void send(DOMString data);
   void send(Blob data);
   void send(ArrayBuffer data);
@@ -106,13 +106,37 @@ interface ReconnectingResendingWebSocket : EventTarget {
   const unsigned short CLOSED = 3;
 
   // networking
-           attribute EventHandler onopen;
-           attribute EventHandler onerror;
-           attribute EventHandler onclose;
+          attribute EventHandler onopen;
+          attribute EventHandler onerror;
+          attribute EventHandler onclose;
   void close([Clamp] optional unsigned short code, optional DOMString reason);
 
   // messaging
-           attribute EventHandler onmessage;
+          attribute EventHandler onmessage;
+  void send(DOMString data);
+  void send(Blob data);
+  void send(ArrayBuffer data);
+  void send(ArrayBufferView data);
+```
+
+#### What's a HuntingWebSocket look like?
+
+```
+[Constructor([DOMString url])] - ? that's not right is it ?
+interface HuntingWebSocket : EventTarget {
+  attribute WebSocket currSocket;
+
+  // networking
+          attribute EventHandler onopen;
+          attribute EventHandler onerror;
+          attribute EventHandler onclose;
+          attribute EventHandler onreconnect
+  void close();
+
+  // messaging
+          attribute EventHandler onmessage;
+          attribute EventHandler ondatanotsent;
+          attribute EventHandler onsentto;
   void send(DOMString data);
   void send(Blob data);
   void send(ArrayBuffer data);
