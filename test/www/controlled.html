@@ -11,6 +11,7 @@
     window.debug = true;
   </script>
   <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/server_controller.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
     var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket;
@@ -19,31 +20,15 @@
     QUnit.asyncTest('reconnect controlled', function(assert) {
       expect(4);
       var testWs = new ReconnectingWebSocket("ws://localhost:8081/socket");
-      var controllingWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
-      testWs.gotPid        = Q.defer();
-      controllingWs.gotPid = Q.defer();
+      var controllingWs = new SocketServerController(8080);
+      var testServer;
 
-      function onOpen(evt) {
-        this.send("what's your pid");
-      };
-
-      function messageHandler(evt) {
-        var data = evt.data;
-        console.log(evt.data);
-        try {
-          data = JSON.parse(evt.data);
-          if (data.pid){
-            this.pid = data.pid;
-            this.gotPid.resolve();
-          }
-        } catch (e) {
-        }
-      };
-
-      controllingWs.onopen = onOpen.bind(controllingWs);
-      controllingWs.onmessage = messageHandler.bind(controllingWs);
-      controllingWs.gotPid.promise.then(function(){
-        controllingWs.send(JSON.stringify({type: "start", port: 8081}));
+      controllingWs.connected.promise.then(function(){
+        testServer = controllingWs.start(8081);
+        testServer.stopped.promise.then(function(){
+          testWs.send('{"type":"echo","echoThis":"never echo me"}');
+          controllingWs.start(8081);
+        });
       });
 
       testWs.onopen = function(){
@@ -56,13 +41,20 @@
       };
       testWs.onclose = function(){
         assert.ok(true, 'closed');
+        controllingWs.kill(8081);
         QUnit.start(); 
       }
-      testWs.send("this won't go");
+
+      testWs.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.echoThis === "never echo me"){
+          assert.ok(false, 'we should never get the message echoed');
+        }
+      }
+
       testWs.ondatanotsent = function() {
         assert.ok(true, "datanotsent");
       }
-      testWs.onmessage = messageHandler.bind(testWs);
 
     });
 
