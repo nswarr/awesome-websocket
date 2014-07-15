@@ -11,126 +11,73 @@
     window.debug = true;
   </script>
   <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/server_controller.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
     var Q = require('q');
-    var ReconnectingWebSocket = require("reconnecting-websocket").ReconnectingWebSocket
-    var controllingWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
-    controllingWs.gotPid = Q.defer();
-    controllingWs.onmessage = function (evt) {
-      var data = evt.data;
-      try {
-        data = JSON.parse(evt.data);
-        if (data.pid){
-          this.pid = data.pid;
-        }
-        this.gotPid.resolve();
-      } catch (e) {
-      }
-    }.bind(controllingWs);
-    controllingWs.onopen = function (evt) { controllingWs.send("what's your pid"); };
+    var HuntingWebSocket = require("reconnecting-websocket").HuntingWebSocket;
+    var controllingWs = new SocketServerController(8080);
 
-    QUnit.asyncTest('send prior to connect', function(assert) {
-      var HuntingWebSocket = require("reconnecting-websocket").HuntingWebSocket;
-      expect(5);
-      var testWs = new HuntingWebSocket([
-        "ws://localhost:8081/socket",
-        "ws://localhost:8082/socket",
-        "ws://localhost:8083/socket",
-        "ws://localhost:8084/socket"
-      ]);
-      
-      testWs.onconnectionopen = _.after(4, function() {
-        assert.ok(true, "all connected");
-        QUnit.start();
-      });
-
-      testWs.onopen = function(){
-        assert.ok(true, "opened");
-      };
-      
-      function validateMessageType(type, assertionMessage){
-        function assertType (message){
-          assert.equal(type, message.type, assertionMessage);
-        }
-        return _.once(assertType);
-      }
-      var onsenttoMessageTypeCheck = validateMessageType('onsentto', 'onsentto message type');
-      testWs.onsentto = function(evt){
-        onsenttoMessageTypeCheck(evt);
-      }
-      testWs.ondatanotsent = _.once(function(me){
-        var data = JSON.parse(me.data);
-        assert.equal(data.echoThis, "sent before sockets up", "datanotsent before sockets up");
-      });
-      testWs.onmessage = function(message){ 
-        try{
-          message = JSON.parse(message.data);
-          if ( message.type === "echo" && message.echoThis === "sent before sockets up" ){
-            assert.ok(true, "message sent before sockets were up, arrived");
-          }
-        } catch(e) {}
-      }
-      // this send will 'fail' until the servers start
-      testWs.send('{"type": "echo", "echoThis": "sent before sockets up"}');
-      controllingWs.gotPid.promise.then(function(){
-        controllingWs.send(JSON.stringify({type: "start", port: 8081}));
-        controllingWs.send(JSON.stringify({type: "start", port: 8082}));
-        controllingWs.send(JSON.stringify({type: "start", port: 8083}));
-        controllingWs.send(JSON.stringify({type: "start", port: 8084}));
-      });
-
-    });
     QUnit.asyncTest('message to dead server goes to next', function(assert) {
-      var HuntingWebSocket = require("reconnecting-websocket").HuntingWebSocket;
-      expect(1);
-      var receivedEcho = Q.defer();
-      var gotSecondMessage = Q.defer();
-      var initialConnectionUsed;
-      var secondConnectionUsed;
-      var justDiedPort;
+      expect(2);
+      var serverOne, serverTwo;
       var testWs = new HuntingWebSocket([
         "ws://localhost:8085/socket",
         "ws://localhost:8086/socket"
       ]);
-      testWs.onmessage = function(evt){
-        var message = JSON.parse(evt.data);
-        // having received our first message our hunting socket will have set
-        // it's currSocket to the connection used to send it
-        if ( message.type === "echo" && message.echoThis === "first message" ){
-          initialConnectionUsed = testWs.currSocket.underlyingWs.url;
-          receivedEcho.resolve();
-        } else if ( message.type === "echo" && message.echoThis === "second message" ){
-          secondConnectionUsed = testWs.currSocket.underlyingWs.url;
-          gotSecondMessage.resolve();
-        } else if ( message.type === "dying" ){
-          justDiedPort = message.port;
+      var gotMessageOne = Q.defer();
+      var gotMessageTwo = Q.defer();
+
+      testWs.onmessage = function(message){
+        var message = JSON.parse(message.data);
+        if ( message.type === "echo" && message.echoThis === "message one"){
+          gotMessageOne.resolve();
+        } else if ( message.type === "echo" && message.echoThis === "message two"){
+          gotMessageTwo.resolve();
         }
       }
-      testWs.onreconnect = function(){
-        testWs.send(JSON.stringify({type: "echo", echoThis: "second message"}));
-        console.log(testWs.currSocket.underlyingWs.url);
+      // actual sending could take some number of tries... we just want to 
+      // make sure it comes through here
+      assertMessageTwoContents = _.once(function(data){
+        assert.equal("message two", data.echoThis, "message not sent");
+      });
+      testWs.ondatanotsent = function(evt) {
+        data = JSON.parse(evt.data);
+        if ( data.echoThis === "message two" ){
+          assertMessageTwoContents(data);
+        }
       }
-      controllingWs.gotPid.promise.then(function(){
-        controllingWs.send(JSON.stringify({type: "start", port: 8085}));
-        controllingWs.send(JSON.stringify({type: "start", port: 8086}));
-      });
-      testWs.send(JSON.stringify({type: "echo", echoThis: "first message"}));
-      receivedEcho.promise.then(function(){
-        testWs.send("die");
-        testWs.send(JSON.stringify({type: "echo", echoThis: "second message"}));
-      });
-      Q.all([receivedEcho.promise, gotSecondMessage.promise]).then(function(){
-        console.log("pants");
-        console.log(initialConnectionUsed);
-        console.log(secondConnectionUsed);
-        assert.notStrictEqual(initialConnectionUsed, secondConnectionUsed, "connections used");
-        controllingWs.send(JSON.stringify({action: "kill", port: 8085}));
-        controllingWs.send(JSON.stringify({action: "kill", port: 8086}));
-        QUnit.start();
-      });
-    });
 
+      function sendMessageOne(){
+        console.log("sending message one");
+        testWs.send(JSON.stringify({type: "echo", echoThis: "message one"}));
+        // we'll send the second message whenever a server dies
+        serverOne.stopped.promise.then(sendMessageTwo);
+        serverTwo.stopped.promise.then(sendMessageTwo);
+      }
+      
+      var sendMessageTwo = _.once(function(){
+        console.log("sending message two");
+        testWs.send(JSON.stringify({type: "echo", echoThis: "message two"}));
+      });
+
+      controllingWs.connected.promise.then(function(){
+        serverOne = controllingWs.start(8085);
+        serverTwo = controllingWs.start(8086);
+        Q.all([ serverOne.started.promise, serverTwo.started.promise ])
+        .then(sendMessageOne);
+        // kill the server the test socket is connected to 
+        gotMessageOne.promise.then(function() { testWs.send("die"); });
+        gotMessageTwo.promise.then(function(){
+          assert.ok(true, "received message two");
+          //clean up the test servers
+          controllingWs.kill(8085).kill(8086);
+          testWs.close();
+          QUnit.start();
+        });
+      }).fail(function(e){console.log(e); });
+      
+    });
   </script>
 </head>
 <body>
