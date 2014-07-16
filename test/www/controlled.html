@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+
+<html lang="en" ng-app='theApp'>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
+  <title>reconnecting websocket tests</title>
+  <script src="//code.jquery.com/qunit/qunit-1.14.0.js"></script>
+  <script type="text/javascript">
+    window.debug = true;
+  </script>
+  <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/server_controller.js"> </script>
+  <script type="text/javascript" src="js/lodash.js"> </script>
+  <script type="text/javascript">
+    var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
+    var Q = require('q');
+
+    QUnit.asyncTest('reconnect controlled', function(assert) {
+      expect(4);
+      var testWs = new ReconnectingWebSocket("ws://localhost:8081/socket");
+      var controllingWs = new SocketServerController(8080);
+      var testServer;
+
+      controllingWs.connected.promise.then(function(){
+        testServer = controllingWs.start(8081);
+        testServer.stopped.promise.then(function(){
+          testWs.send('{"type":"echo","echoThis":"never echo me"}');
+          controllingWs.start(8081);
+        });
+      });
+
+      testWs.onopen = function(){
+        assert.ok(true, "connected");
+        testWs.send("die");
+      }
+      testWs.onreconnect = function() {
+        assert.ok(true, 'reconnected');
+        testWs.close();
+      };
+      testWs.onclose = function(){
+        assert.ok(true, 'closed');
+        controllingWs.kill(8081);
+        QUnit.start(); 
+      }
+
+      testWs.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.echoThis === "never echo me"){
+          assert.ok(false, 'we should never get the message echoed');
+        }
+      }
+
+      testWs.ondatanotsent = function() {
+        assert.ok(true, "datanotsent");
+      }
+
+    });
+
+  </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+</body>
+</html>

@@ -22,23 +22,25 @@ function sender(data){
   // if the socket isn't open, we'll just reconnect and let the
   // caller try again cause we know this raises an uncatchable
   // error
-  if (this.underlyingWs.readyState != OriginalWebSocket.OPEN){
+  if (this.underlyingWs == null || this.underlyingWs.readyState != OriginalWebSocket.OPEN){
     log.info("this.underlyingWs not open, reconnecting");
+    this.ondatanotsent(new MessageEvent("datanotsent", {data:data}));
     this.reconnect();
-    this.ondatanotsent(data);
   } else {
     // otherwise we try to send, and if we have a failure
     // we'll go ahead and reconnect, telling our caller
     // all about how we failed via onsendfailed
     try {
-      log.info("sending: ", data);
+      log.debug("sending to(%s) : %j", this.underlyingWs.url, data);
       this.underlyingWs.send(data);
+      return true; //sent
     } catch (error) {
-      log.error("error during send on this.underlyingWs", e);
+      log.error(error);
+      this.ondatanotsent(new MessageEvent("datanotsent", {data:data}));
       this.reconnect();
-      this.ondatanotsent(data);
     }
   }
+  return false; // not sent
 }
 
 function ReconnectingWebSocket(url, protocols){
@@ -60,10 +62,10 @@ function ReconnectingWebSocket(url, protocols){
   this.onreconnect = function () {};
 
   this.reconnect = function() {
-    log.info("reconnecting");
+    log.debug("reconnecting: ", url);
     if ( readyState === OriginalWebSocket.CONNECTING ||
          readyState === RECONNECTING || 
-         this.underlyingWs.readyState === OriginalWebSocket.CONNECTING )
+         (this.underlyingWs != null && this.underlyingWs.readyState === OriginalWebSocket.CONNECTING ))
     {
       return;
     }
@@ -92,7 +94,7 @@ function ReconnectingWebSocket(url, protocols){
       if ( totalConnects === 0 ) {
         this.onopen(evt);
       } else {
-        this.onreconnect();
+        this.onreconnect(new Event('reconnect'));
       }
       reconnectAttempts = 0; // reset
       totalConnects++;
@@ -123,7 +125,7 @@ function ReconnectingWebSocket(url, protocols){
 
   this.close = function () {
     reconnectOnClose = false;
-    this.underlyingWs.close();
+    this.underlyingWs.close.apply(this.underlyingWs, arguments);
   }.bind(this);
 
   setTimeout(connect, 0);
@@ -146,11 +148,11 @@ function ReconnectingResendingWebSocket(url){
   // we're making 'local' versions of these event handlers because we want
   // to remember them for later comparison during send.  This is so we can be nice
   // and catch people who do things that may break our resending
-  var ondatanotsent = function(data) {
+  var ondatanotsent = function(e) {
     log.info("queueing message for resend");
-    unsentMessages.push(data);
+    unsentMessages.push(e.data);
   }.bind(this);
-  var onreconnect = function() { 
+  var onreconnect = function(e) { 
     while (unsentMessages.length != 0){
       var message = unsentMessages.shift();
       this.send(message);
@@ -224,4 +226,4 @@ module.exports.MakeWebSocketReconnecting = MakeWebSocketReconnecting;
 module.exports.MakeWebSocketReconnectingAndResending = MakeWebSocketReconnectingAndResending;
 module.exports.ReconnectingWebSocket = ReconnectingWebSocket;
 module.exports.ReconnectingResendingWebSocket = ReconnectingResendingWebSocket;
-module.exports.KeepAliveWebSocket = Object.mixin(WebSocket.prototype,KeepAliveMixin.prototype)
+module.exports.KeepAliveWebSocket = Object.mixin(WebSocket.prototype,KeepAliveMixin.prototype);

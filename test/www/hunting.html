@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+
+<html lang="en" ng-app='theApp'>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
+  <title>reconnecting websocket tests</title>
+  <script src="//code.jquery.com/qunit/qunit-1.14.0.js"></script>
+  <script type="text/javascript">
+    window.debug = true;
+  </script>
+  <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/server_controller.js"> </script>
+  <script type="text/javascript" src="js/lodash.js"> </script>
+  <script type="text/javascript">
+    var Q = require('q');
+    var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
+    var controllingWs = new SocketServerController(8080);
+
+    QUnit.asyncTest('message to dead server goes to next', function(assert) {
+      expect(2);
+      var serverOne, serverTwo;
+      var testWs = new HuntingWebSocket([
+        "ws://localhost:8085/socket",
+        "ws://localhost:8086/socket"
+      ]);
+      var gotMessageOne = Q.defer();
+      var gotMessageTwo = Q.defer();
+
+      testWs.onmessage = function(message){
+        var message = JSON.parse(message.data);
+        if ( message.type === "echo" && message.echoThis === "message one"){
+          gotMessageOne.resolve();
+        } else if ( message.type === "echo" && message.echoThis === "message two"){
+          gotMessageTwo.resolve();
+        }
+      }
+      // actual sending could take some number of tries... we just want to 
+      // make sure it comes through here
+      assertMessageTwoContents = _.once(function(data){
+        assert.equal("message two", data.echoThis, "message not sent");
+      });
+      testWs.ondatanotsent = function(evt) {
+        data = JSON.parse(evt.data);
+        if ( data.echoThis === "message two" ){
+          assertMessageTwoContents(data);
+        }
+      }
+
+      function sendMessageOne(){
+        console.log("sending message one");
+        testWs.send(JSON.stringify({type: "echo", echoThis: "message one"}));
+        // we'll send the second message whenever a server dies
+        serverOne.stopped.promise.then(sendMessageTwo);
+        serverTwo.stopped.promise.then(sendMessageTwo);
+      }
+      
+      var sendMessageTwo = _.once(function(){
+        console.log("sending message two");
+        testWs.send(JSON.stringify({type: "echo", echoThis: "message two"}));
+      });
+
+      controllingWs.connected.promise.then(function(){
+        serverOne = controllingWs.start(8085);
+        serverTwo = controllingWs.start(8086);
+        Q.all([ serverOne.started.promise, serverTwo.started.promise ])
+        .then(sendMessageOne);
+        // kill the server the test socket is connected to 
+        gotMessageOne.promise.then(function() { testWs.send("die"); });
+        gotMessageTwo.promise.then(function(){
+          assert.ok(true, "received message two");
+          //clean up the test servers
+          controllingWs.kill(8085).kill(8086);
+          testWs.close();
+          QUnit.start();
+        });
+      }).fail(function(e){console.log(e); });
+      
+    });
+  </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+</body>
+</html>

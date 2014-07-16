@@ -1,29 +1,45 @@
 {
   "name": "ws-additions",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "Helpful additional functionality for the vanilla WebSocket.",
-  "keywords": ["WebSocket","reconnect","reconnecting","resend"],
+  "keywords": [
+    "WebSocket",
+    "reconnect",
+    "reconnecting",
+    "resend"
+  ],
   "main": "index.js",
-  "author": {"name": "Ian Groff"},
+  "author": {
+    "name": "Ian Groff"
+  },
   "contributors": [
-    {"name": "Ian Groff", "url": "https://github.com/igroff"},
-    {"name": "Ryan Fairchild", "url": "https://github.com/unscene"},
-    {"name": "David Hayes", "url": "https://drhayes.io"}
+    {
+      "name": "Ian Groff",
+      "url": "https://github.com/igroff"
+    },
+    {
+      "name": "Ryan Fairchild",
+      "url": "https://github.com/unscene"
+    },
+    {
+      "name": "David Hayes",
+      "url": "https://drhayes.io"
+    }
   ],
   "license": "ISC",
-  "repository": {"type": "git", "url": "https://github.com/igroff/ws-additions.git"},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/igroff/ws-additions.git"
+  },
   "dependencies": {
     "ws": "0.4.31",    
     "object-mixin":"0.2.1",
-    "simplog": "0.1.0"
+    "simplog": "0.1.0",
+    "lodash": "^2.4.1"
   },
-  "devDependencies": {
-    "express": "4.4.5",
-    "express-logger": "0.0.3",
-    "body-parser": "1.4.3",
-    "errorhandler": "1.1.1",
-    "browserify": "4.2.0",
-    "serve-static": "1.3.0",
-    "supervisor": "0.6.0"
+  "browserify": {
+    "transform": [
+      "coffeeify"
+    ]
   }
 }

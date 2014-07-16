@@ -13,7 +13,7 @@
   <script type="text/javascript" src="js/reconn.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
-    require("reconnecting-websocket");
+    require("ws-additions");    
 
     QUnit.asyncTest('keep alive should send a ping every n ms', function(assert) {
       expect(10);
@@ -21,15 +21,15 @@
       var ws = new WebSocket("ws://localhost:8080/socket")
     
       ws.onmessage = function(message){
-      
-        if (message.data === "connected"){
-          assert.ok(true, 'received connected message');
-        } else {
-          assert.ok(message.data === "pong", 'received message');
+        var m = JSON.parse(message.data);
+        
+        if (m.type !== "connected"){          
+
+          assert.ok(m.type === "pong", 'received message');
           count++;
         }
 
-        if (count == 9) {
+        if (count == 10) {
           ws.clearKeepAlive();
           QUnit.start();
           return;

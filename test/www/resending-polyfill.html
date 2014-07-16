@@ -5,7 +5,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
-  <title>reconnecting polyfill websocket tests</title>
+  <title>reconnecting resending polyfill websocket tests</title>
   <script src="//code.jquery.com/qunit/qunit-1.14.0.js"></script>
   <script type="text/javascript">
     window.debug = true;
@@ -13,12 +13,11 @@
   <script type="text/javascript" src="js/reconn.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
-    require("ws-additions").MakeWebSocketReconnecting();
+    require("ws-additions").MakeWebSocketReconnectingAndResending();
 
     QUnit.test('should have unmake', function(assert){
-      assert.ok(UnMakeWebSocketReconnecting, 'unmake available');
+      assert.ok(UnMakeWebSocketReconnectingAndResending, 'unmake available');
     });
-
     QUnit.asyncTest('connect on create', function(assert) {
       expect(2);
       var ws = new WebSocket("ws://localhost:8080/socket")
@@ -31,7 +30,6 @@
         QUnit.start();
       }
     });
-
     QUnit.asyncTest('will reconnect', function(assert) {
       expect(4);
       var ws = new WebSocket("ws://localhost:8080/socket");
@@ -52,7 +50,6 @@
         QUnit.start();
       }
     });
-
     QUnit.asyncTest('receives message', function(assert) {
       expect(2);
       var ws = new WebSocket("ws://localhost:8080/socket")
