@@ -209,6 +209,8 @@ The hunting websocket is so unlike anything else, it seems unlikely that a polyf
 would be valuable, so he's a little more basic.
 
 ```html
+<script src="js/reconn.js"></script>
+<script>
     var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
     var testWs = new HuntingWebSocket([
       "ws://localhost:8085/socket",
