@@ -1,7 +1,6 @@
 .PHONY: watch clean run-server
 
-watch:
-	npm link
+watch:	
 	cd test && $(MAKE) watch
 
 run-server: 
