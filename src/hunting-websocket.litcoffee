@@ -16,7 +16,6 @@ This is fired when the active server changes, this will be after a `send` as
 that is the only time the socket has activity to 'know' it switched servers.
 
     ReconnectingWebSocket = require('./reconnecting-websocket.js').ReconnectingWebSocket
-    WebSocket = WebSocket or require('ws')
 
     class HuntingWebSocket
       constructor: (@urls) ->
