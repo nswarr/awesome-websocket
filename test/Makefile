@@ -1,12 +1,11 @@
 .PHONY: test watch run-server clean
 
 build: ./node_modules ../node_modules
-	mkdir -p test/www/js
+	mkdir -p www/js
 	./node_modules/.bin/browserify -r q -r ws-additions --outfile www/js/reconn.js
 
 watch: build
-	cd .. && PORT=8080 DEBUG=true ./test/node_modules/.bin/supervisor -i test/www -e ".litcoffee|.coffee|.js" --exec make run-server
-
+	PORT=8080 DEBUG=true ./node_modules/.bin/supervisor -V --watch .. --ignore ../node_modules,www,node_modules -e ".litcoffee|.coffee|.js" --exec make run-server
 
 run-server: build
 	server/server.js

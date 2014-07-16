@@ -2599,7 +2599,7 @@ module.exports=require('qLuPo1');
 module.exports = require("./src/reconnecting-websocket.js");
 module.exports.HuntingWebSocket = require("./src/hunting-websocket.litcoffee");
 
-},{"./src/hunting-websocket.litcoffee":11,"./src/reconnecting-websocket.js":12}],"ws-additions":[function(require,module,exports){
+},{"./src/hunting-websocket.litcoffee":10,"./src/reconnecting-websocket.js":11}],"ws-additions":[function(require,module,exports){
 module.exports=require('7SYo5N');
 },{}],9:[function(require,module,exports){
 (function (process){
@@ -2665,51 +2665,6 @@ module.exports=require('7SYo5N');
 
 }).call(this,require("FWaASH"))
 },{"FWaASH":2,"util":4}],10:[function(require,module,exports){
-
-/**
- * Module dependencies.
- */
-
-var global = (function() { return this; })();
-
-/**
- * WebSocket constructor.
- */
-
-var WebSocket = global.WebSocket || global.MozWebSocket;
-
-/**
- * Module exports.
- */
-
-module.exports = WebSocket ? ws : null;
-
-/**
- * WebSocket constructor.
- *
- * The third `opts` options object gets ignored in web browsers, since it's
- * non-standard, and throws a TypeError if passed to the constructor.
- * See: https://github.com/einaros/ws/issues/227
- *
- * @param {String} uri
- * @param {Array} protocols (optional)
- * @param {Object) opts (optional)
- * @api public
- */
-
-function ws(uri, protocols, opts) {
-  var instance;
-  if (protocols) {
-    instance = new WebSocket(uri, protocols);
-  } else {
-    instance = new WebSocket(uri);
-  }
-  return instance;
-}
-
-if (WebSocket) ws.prototype = WebSocket.prototype;
-
-},{}],11:[function(require,module,exports){
 var HuntingWebSocket, ReconnectingWebSocket;
 
 ReconnectingWebSocket = require('./reconnecting-websocket.js').ReconnectingWebSocket;
@@ -2836,22 +2791,8 @@ HuntingWebSocket = (function() {
 module.exports = HuntingWebSocket;
 
 
-},{"./reconnecting-websocket.js":12}],12:[function(require,module,exports){
-(function (global){
+},{"./reconnecting-websocket.js":11}],11:[function(require,module,exports){
 log = require('simplog');
-
-// we may replace the 'native' websocket, so we'll be keeping track of the 
-// original so we can reference it or put it back if asked
-var OriginalWebSocket = null;
-if ( typeof(WebSocket) === "undefined" ){
-  log.debug("no native WebSocket found, using 'ws'");
-  // as a convenience we'll provide a WebSocket implementation if
-  // one isn't available, thus this will work in nodejs
-  OriginalWebSocket = require("ws");
-} else {
-  log.debug("native WebSocket found");
-  OriginalWebSocket = WebSocket;
-}
 
 /* This is the function that our implementations will use to send
  * it's out here because we want to use it differently in the various
@@ -2861,7 +2802,7 @@ function sender(data){
   // if the socket isn't open, we'll just reconnect and let the
   // caller try again cause we know this raises an uncatchable
   // error
-  if (this.underlyingWs == null || this.underlyingWs.readyState != OriginalWebSocket.OPEN){
+  if (this.underlyingWs == null || this.underlyingWs.readyState != WebSocket.OPEN){
     log.info("this.underlyingWs not open, reconnecting");
     this.ondatanotsent(new MessageEvent("datanotsent", {data:data}));
     this.reconnect();
@@ -2902,9 +2843,9 @@ function ReconnectingWebSocket(url, protocols){
 
   this.reconnect = function() {
     log.debug("reconnecting: ", url);
-    if ( readyState === OriginalWebSocket.CONNECTING ||
+    if ( readyState === WebSocket.CONNECTING ||
          readyState === RECONNECTING || 
-         (this.underlyingWs != null && this.underlyingWs.readyState === OriginalWebSocket.CONNECTING ))
+         (this.underlyingWs != null && this.underlyingWs.readyState === WebSocket.CONNECTING ))
     {
       return;
     }
@@ -2915,7 +2856,7 @@ function ReconnectingWebSocket(url, protocols){
   }.bind(this);
 
   var connect = function() {
-    readyState = OriginalWebSocket.CONNECTING;
+    readyState = WebSocket.CONNECTING;
     // an attempt to avoid get extraneous events
     // and allow the old socket to be GCd
     if ( this.underlyingWs !== null ){
@@ -2927,9 +2868,9 @@ function ReconnectingWebSocket(url, protocols){
       // GCd
     }
 
-    this.underlyingWs = new OriginalWebSocket(url);
+    this.underlyingWs = new WebSocket(url);
     this.underlyingWs.onopen  = function(evt){
-      readyState = OriginalWebSocket.OPEN;
+      readyState = WebSocket.OPEN;
       if ( totalConnects === 0 ) {
         this.onopen(evt);
       } else {
@@ -2942,7 +2883,7 @@ function ReconnectingWebSocket(url, protocols){
     this.underlyingWs.onclose = function(evt){
       // onclose, unless told to close by having our close() method called
       // we'll ignore the close, and reconnect
-      readyState = OriginalWebSocket.CLOSED;
+      readyState = WebSocket.CLOSED;
       if (reconnectOnClose){
         this.reconnect();
       } else {
@@ -2979,7 +2920,7 @@ function ReconnectingWebSocket(url, protocols){
  * Here we use the ondatanotsent and the onreconnect methods to implement the
  * resend functionality.  This means that those events are not available to the
  * caller, as such we try and detect this error condition and warn about it when
- * sending
+ * sending 
  */
 function ReconnectingResendingWebSocket(url){
   ReconnectingWebSocket.apply(this, arguments);
@@ -3020,31 +2961,13 @@ ReconnectingResendingWebSocket.constructor = ReconnectingResendingWebSocket;
 
 // WS Constants at the 'class' Level.  Adding these since we can replace the
 // native WebSocket and we still want people to be able to access them
-ReconnectingResendingWebSocket.CONNECTING = ReconnectingWebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
-ReconnectingResendingWebSocket.OPEN = ReconnectingWebSocket.OPEN = OriginalWebSocket.OPEN;
-ReconnectingResendingWebSocket.CLOSING = ReconnectingWebSocket.CLOSING = OriginalWebSocket.CLOSING;
-ReconnectingResendingWebSocket.CLOSED = ReconnectingWebSocket.CLOSED = OriginalWebSocket.CLOSED;
+ReconnectingResendingWebSocket.CONNECTING = ReconnectingWebSocket.CONNECTING = WebSocket.CONNECTING;
+ReconnectingResendingWebSocket.OPEN = ReconnectingWebSocket.OPEN = WebSocket.OPEN;
+ReconnectingResendingWebSocket.CLOSING = ReconnectingWebSocket.CLOSING = WebSocket.CLOSING;
+ReconnectingResendingWebSocket.CLOSED = ReconnectingWebSocket.CLOSED = WebSocket.CLOSED;
 
-function MakeWebSocketReconnecting(){
-  WebSocket = ReconnectingWebSocket; 
-  global.UnMakeWebSocketReconnecting = function(){
-    WebSocket = OriginalWebSocket;
-    UnMakeWebSocketReconnecting = null;
-  };
-}
 
-function MakeWebSocketReconnectingAndResending(){
-  WebSocket = ReconnectingResendingWebSocket; 
-  global.UnMakeWebSocketReconnectingAndResending = function(){
-    WebSocket = OriginalWebSocket;
-    UnMakeWebSocketReconnectingAndResending = null;
-  };
-}
-
-module.exports.MakeWebSocketReconnecting = MakeWebSocketReconnecting;
-module.exports.MakeWebSocketReconnectingAndResending = MakeWebSocketReconnectingAndResending;
 module.exports.ReconnectingWebSocket = ReconnectingWebSocket;
 module.exports.ReconnectingResendingWebSocket = ReconnectingResendingWebSocket;
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"simplog":9,"ws":10}]},{},[])
+},{"simplog":9}]},{},[])
