@@ -227,7 +227,7 @@ send pings to your server every so often.
 ```html
 <script src="js/reconn.js"></script>
 <script>
-  require("reconnecting-websocket");
+  require("ws-additions");
   
   var ws = new WebSocket("ws://localhost:8080/socket")
   ws.onopen = function() {
