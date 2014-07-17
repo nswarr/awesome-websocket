@@ -34,7 +34,8 @@
   "dependencies": {
     "ws": "0.4.31",
     "simplog": "0.1.0",
-    "lodash": "^2.4.1"
+    "lodash": "^2.4.1",
+    "coffeeify": "0.6.0"
   },
   "browserify": {
     "transform": [
