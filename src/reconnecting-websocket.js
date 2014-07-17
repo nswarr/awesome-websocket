@@ -9,7 +9,7 @@ function sender(data){
   // caller try again cause we know this raises an uncatchable
   // error
   if (this.underlyingWs == null || this.underlyingWs.readyState != WebSocket.OPEN){
-    log.info("this.underlyingWs not open, reconnecting");
+    //log.info("this.underlyingWs not open, reconnecting");
     this.ondatanotsent(new MessageEvent("datanotsent", {data:data}));
     this.reconnect();
   } else {
@@ -52,7 +52,7 @@ function ReconnectingWebSocket(url, protocols){
   this.onreconnect = function () {};
 
   this.reconnect = function() {
-    log.debug("reconnecting: ", url);
+    //log.debug("reconnecting: ", url);
     if ( readyState === WebSocket.CONNECTING ||
          readyState === RECONNECTING || 
          (this.underlyingWs != null && this.underlyingWs.readyState === WebSocket.CONNECTING ))

@@ -2728,11 +2728,7 @@ HuntingWebSocket = (function() {
 
   HuntingWebSocket.prototype.send = function(data) {
     if (data) {
-      if (this.currSocket) {
-        this.currSocket.send(data);
-      } else {
-        this.pendingMessages.push(data);
-      }
+      this.pendingMessages.push(data);
     }
     return this.processPendingMessages();
   };
@@ -2744,15 +2740,15 @@ HuntingWebSocket = (function() {
     }
     processMessages = (function(_this) {
       return function() {
-        var message, myMessages;
-        myMessages = _this.pendingMessages.slice(0);
-        while (message = myMessages.shift()) {
-          _this.send(message);
+        var message, _results;
+        _results = [];
+        while (message = _this.pendingMessages.shift()) {
+          _results.push(_this.send(message));
         }
-        return _this.scheduled = void 0;
+        return _results;
       };
     })(this);
-    return this.scheduled = setTimeout(processMessages, 500);
+    return this.scheduled = setInterval(processMessages, 500);
   };
 
   HuntingWebSocket.prototype.keepAlive = function(intervalInMs, message) {
@@ -2811,7 +2807,7 @@ function sender(data){
   // caller try again cause we know this raises an uncatchable
   // error
   if (this.underlyingWs == null || this.underlyingWs.readyState != WebSocket.OPEN){
-    log.info("this.underlyingWs not open, reconnecting");
+    //log.info("this.underlyingWs not open, reconnecting");
     this.ondatanotsent(new MessageEvent("datanotsent", {data:data}));
     this.reconnect();
   } else {
@@ -2854,7 +2850,7 @@ function ReconnectingWebSocket(url, protocols){
   this.onreconnect = function () {};
 
   this.reconnect = function() {
-    log.debug("reconnecting: ", url);
+    //log.debug("reconnecting: ", url);
     if ( readyState === WebSocket.CONNECTING ||
          readyState === RECONNECTING || 
          (this.underlyingWs != null && this.underlyingWs.readyState === WebSocket.CONNECTING ))

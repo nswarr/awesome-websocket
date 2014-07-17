@@ -58,20 +58,15 @@ If there was a problem sending this message, let's try another socket
 
       send: (data) =>
         if data
-          if @currSocket
-            @currSocket.send data
-          else
-            @pendingMessages.push data
+          @pendingMessages.push data
         @processPendingMessages()
 
       processPendingMessages: () =>
         return if @scheduled or @closed
         processMessages = () =>
-          myMessages = @pendingMessages.slice(0)
-          while message = myMessages.shift()
+          while message = @pendingMessages.shift()
             @send(message)
-          @scheduled = undefined
-        @scheduled = setTimeout processMessages, 500
+        @scheduled = setInterval processMessages, 500
 
 Setup keep alive on our underlying sockets.  Yup, on each one regardless of
 which one(s) are current, you know so they'll all be good if we have to switch
