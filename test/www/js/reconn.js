@@ -2052,13 +2052,13 @@ HuntingWebsocket = (function() {
     return this.messageQueue.unshift(data);
   };
 
-  HuntingWebsocket.prototype.keepAlive = function(timeout, message) {
+  HuntingWebsocket.prototype.keepAlive = function(timeoutMs, message) {
     var socket, _i, _len, _ref, _results;
     _ref = this.sockets;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       socket = _ref[_i];
-      _results.push(socket.keepAlive(timeout, message));
+      _results.push(socket.keepAlive(timeoutMs, message));
     }
     return _results;
   };
@@ -2181,14 +2181,14 @@ ReconnectingWebSocket = (function() {
     return this.ws.close();
   };
 
-  ReconnectingWebSocket.prototype.keepAlive = function(timeout, message) {
+  ReconnectingWebSocket.prototype.keepAlive = function(timeoutMs, message) {
     var sendMessage;
     sendMessage = (function(_this) {
       return function() {
         return _this.send(message);
       };
     })(this);
-    return setInterval(sendMessage, timeout);
+    return setInterval(sendMessage, timeoutMs);
   };
 
   ReconnectingWebSocket.prototype.onopen = function(event) {};

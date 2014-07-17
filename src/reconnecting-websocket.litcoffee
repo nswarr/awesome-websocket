@@ -81,9 +81,9 @@ Since there's all sorts of ways your connection can be severed if it's not activ
 ( e.g. nginx ), we'll allow you to specify a keep alive message and an interval
 on which to send it.
     
-      keepAlive: (timeout, message) ->
+      keepAlive: (timeoutMs, message) ->
         sendMessage = () => @send(message)
-        setInterval(sendMessage, timeout)
+        setInterval(sendMessage, timeoutMs)
 
 Empty shims for the event handlers. These are just here for discovery via
 the debugger.

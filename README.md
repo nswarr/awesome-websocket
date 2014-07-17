@@ -22,9 +22,6 @@ things over and over.
 
 * Reconnecting - in the event of the server going down intentionally or otherwise
 it's good to have the socket just pickup as if the server were never gone.
-* Resending - as a consumer of a WebSocket enabled service, it'd sure be nice if
-when you say ws.send('my message') that the message will go, even if the socket
-isn't connected when you call 'send'.
 * Hunting - given a list of hosts, connect to them and send messages to which
 ever one is available, switching to another if the 'active' connection becomes
 unavailable.  Dumb-as-dirt client side fail over.
@@ -83,28 +80,9 @@ interface ReconnectingWebSocket : EventTarget {
           attribute EventHandler onopen;
           attribute EventHandler onerror;
           attribute EventHandler onclose;
-          attribute EventHandler onreconnect;
-  void close([Clamp] optional unsigned short code, optional DOMString reason);
-
-  // messaging
-          attribute EventHandler onmessage;
-          attribute EventHandler ondatanotsent;
-  void send(DOMString data);
-  void send(Blob data);
-  void send(ArrayBuffer data);
-  void send(ArrayBufferView data);
-```
-#### What's a ReconnectingResendingWebSocket look like?
-
-```
-[Constructor(DOMString url)]
-interface ReconnectingResendingWebSocket : EventTarget {
-  attribute WebSocket underlyingWs;
-
-  // networking
-          attribute EventHandler onopen;
-          attribute EventHandler onerror;
-          attribute EventHandler onclose;
+  // ondisconnect is a convenience that is intended for testing, but in the 
+  // spirit of transparency...
+          attribute EventHandler ondisconnect;
   void close([Clamp] optional unsigned short code, optional DOMString reason);
 
   // messaging
@@ -113,12 +91,15 @@ interface ReconnectingResendingWebSocket : EventTarget {
   void send(Blob data);
   void send(ArrayBuffer data);
   void send(ArrayBufferView data);
+
+  void keepAlive(int timeoutMs, DOMString message)
+  void keepAlive(int timeoutMs, Object message)
 ```
 
 #### What's a HuntingWebSocket look like?
 
 ```
-[Constructor([DOMString url])] - ? that's not right is it ?
+[Constructor([DOMString url] | DOMString url)]
 interface HuntingWebSocket : EventTarget {
   attribute WebSocket currSocket;
 
@@ -126,17 +107,17 @@ interface HuntingWebSocket : EventTarget {
           attribute EventHandler onopen;
           attribute EventHandler onerror;
           attribute EventHandler onclose;
-          attribute EventHandler onreconnect
   void close();
 
   // messaging
           attribute EventHandler onmessage;
-          attribute EventHandler ondatanotsent;
-          attribute EventHandler onsentto;
   void send(DOMString data);
   void send(Blob data);
   void send(ArrayBuffer data);
   void send(ArrayBufferView data);
+
+  void keepAlive(int timeoutMs, DOMString message)
+  void keepAlive(int timeoutMs, Object message)
 ```
 
 You can consume the functionality in a couple ways, either by explicit

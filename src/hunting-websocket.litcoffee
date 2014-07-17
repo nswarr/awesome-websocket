@@ -95,9 +95,9 @@ Sending just queues up a message to go out to the server.
 Allow for specifiecation of a keep alive, which is just passed on to the
 underlying reconnecting sockets.
 
-      keepAlive: (timeout, message) ->
+      keepAlive: (timeoutMs, message) ->
         for socket in @sockets
-          socket.keepAlive(timeout, message)
+          socket.keepAlive(timeoutMs, message)
 
 Close all the sockets.
 
