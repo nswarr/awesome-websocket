@@ -1996,6 +1996,9 @@ HuntingWebsocket = (function() {
     this.lastSocket = void 0;
     this.sockets = [];
     this.messageQueue = [];
+    if (typeof this.urls === "string") {
+      this.urls = [this.urls];
+    }
     _ref = this.urls;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       url = _ref[_i];
@@ -2047,6 +2050,17 @@ HuntingWebsocket = (function() {
 
   HuntingWebsocket.prototype.send = function(data) {
     return this.messageQueue.unshift(data);
+  };
+
+  HuntingWebsocket.prototype.keepAlive = function(timeout, message) {
+    var socket, _i, _len, _ref, _results;
+    _ref = this.sockets;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      socket = _ref[_i];
+      _results.push(socket.keepAlive(timeout, message));
+    }
+    return _results;
   };
 
   HuntingWebsocket.prototype.close = function() {
@@ -2165,6 +2179,16 @@ ReconnectingWebSocket = (function() {
   ReconnectingWebSocket.prototype.close = function() {
     this.forceclose = true;
     return this.ws.close();
+  };
+
+  ReconnectingWebSocket.prototype.keepAlive = function(timeout, message) {
+    var sendMessage;
+    sendMessage = (function(_this) {
+      return function() {
+        return _this.send(message);
+      };
+    })(this);
+    return setInterval(sendMessage, timeout);
   };
 
   ReconnectingWebSocket.prototype.onopen = function(event) {};

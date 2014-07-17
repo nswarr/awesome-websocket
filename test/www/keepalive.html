@@ -18,25 +18,6 @@
     var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
     var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
 
-    QUnit.asyncTest('keep alive on ReconnectingResendingWebSocket', function(assert) {
-      expect(4);
-      var testWs = new ReconnectingResendingWebSocket("ws://localhost:8080/socket");
-      testWs.keepAlive(100, JSON.stringify({type:"echo", echoThis:"ka"}));
-
-      var shutHerDown = _.after(4, function(){
-        QUnit.start();
-        testWs.close();
-      });
-
-      testWs.onmessage = function(message){
-        message = JSON.parse(message.data);
-        if ( message.echoThis === "ka" ){
-          assert.equal("ka", message.echoThis, "keep alive message");
-          shutHerDown();
-        }
-      }
-    });
-
     QUnit.asyncTest('keep alive on ReconnectingWebSocket', function(assert) {
       expect(4);
       var testWs = new ReconnectingWebSocket("ws://localhost:8080/socket");

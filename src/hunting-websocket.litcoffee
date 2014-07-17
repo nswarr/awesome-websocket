@@ -30,6 +30,8 @@ that is the only time the socket has activity to 'know' it switched servers.
         @lastSocket = undefined
         @sockets = []
         @messageQueue = []
+        if typeof(@urls) is "string"
+          @urls = [@urls]
 
 All the urls are reconnecting sockets, these will connect themselves.
 
@@ -89,6 +91,13 @@ Sending just queues up a message to go out to the server.
 
       send: (data) ->
         @messageQueue.unshift data
+
+Allow for specifiecation of a keep alive, which is just passed on to the
+underlying reconnecting sockets.
+
+      keepAlive: (timeout, message) ->
+        for socket in @sockets
+          socket.keepAlive(timeout, message)
 
 Close all the sockets.
 

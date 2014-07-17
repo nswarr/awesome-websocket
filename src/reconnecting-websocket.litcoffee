@@ -77,6 +77,14 @@ to know that we did or did not get past a send.
         @forceclose = true
         @ws.close()
 
+Since there's all sorts of ways your connection can be severed if it's not active
+( e.g. nginx ), we'll allow you to specify a keep alive message and an interval
+on which to send it.
+    
+      keepAlive: (timeout, message) ->
+        sendMessage = () => @send(message)
+        setInterval(sendMessage, timeout)
+
 Empty shims for the event handlers. These are just here for discovery via
 the debugger.
 

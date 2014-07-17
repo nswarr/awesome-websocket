@@ -18,6 +18,23 @@
     var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
     var controllingWs = new SocketServerController(8080);
 
+    QUnit.asyncTest('constructor takes a string or a list', function(assert) {
+      expect(2);
+      var testWsWithString = new HuntingWebSocket("ws://localhost:8080/socket");
+      var testWsWithArray = new HuntingWebSocket(["ws://localhost:8080/socket"]);
+      var closer = _.after(2, function() { QUnit.start(); });
+      testWsWithString.onopen = function() {
+        assert.ok(true, "opened with a string arg");
+        testWsWithString.close();
+      } 
+      testWsWithArray.onopen = function() {
+        assert.ok(true, "opened with an array arg");
+        testWsWithArray.close();
+      } 
+      testWsWithArray.onclose = closer;
+      testWsWithString.onclose = closer;
+    });
+
     QUnit.asyncTest('sending an object as a string', function(assert) {
       expect(1);
       var testWs = new HuntingWebSocket(["ws://localhost:8080/socket"]);
