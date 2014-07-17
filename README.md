@@ -182,17 +182,18 @@ you.
 ```
 
 Proxies have fun with Websockets.  Nginx in particular has a great default that will
-kill the connection if it is idle for too long. So you can opt to have Websocket
-send pings to your server every so often.
+kill the connection if it is idle for too long. So you can opt to have these websockets
+send pings to your server every so often. It works the same way for each of the
+aforementioned sockets, you call keepAlive passing an interval (in ms) and a message
+that your server will respond to.
 
 ```html
 <script src="js/reconn.js"></script>
 <script>
-  require("ws-additions");
-  
   var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
   var ws = new ReconnectingWebSocket("ws://localhost:8080/socket")
   ws.onopen = function() {
+    // this sets up the keep alive
     ws.keepAlive(60 * 1000, "ping!");
   }
 
