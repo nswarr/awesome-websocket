@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+
+<html lang="en" ng-app='theApp'>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
+  <title>reconnecting websocket tests</title>
+  <script src="//code.jquery.com/qunit/qunit-1.14.0.js"></script>
+  <script type="text/javascript">
+    window.debug = true;
+  </script>
+  <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/server_controller.js"> </script>
+  <script type="text/javascript" src="js/lodash.js"> </script>
+  <script type="text/javascript">
+    var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
+
+    QUnit.asyncTest('reconnect controlled', function(assert) {
+      expect(4);
+      var testWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
+      testWs.keepAlive(100, JSON.stringify({type:"echo", echoThis:"ka"}));
+
+      var shutHerDown = _.after(4, function(){
+        QUnit.start();
+        testWs.close();
+      });
+
+      testWs.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.echoThis === "ka" ){
+          assert.equal("ka", message.echoThis, "keep alive message");
+          shutHerDown();
+        }
+      }
+
+
+    });
+
+  </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+</body>
+</html>

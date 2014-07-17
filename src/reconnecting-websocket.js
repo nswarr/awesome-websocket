@@ -1,5 +1,4 @@
 log = require('simplog');
-require('object-mixin');
 
 /* This is the function that our implementations will use to send
  * it's out here because we want to use it differently in the various
@@ -170,34 +169,25 @@ function ReconnectingResendingWebSocket(url){
 ReconnectingResendingWebSocket.prototype = Object.create(ReconnectingWebSocket.prototype);
 ReconnectingResendingWebSocket.constructor = ReconnectingResendingWebSocket;
 
-// WS Constants at the 'class' Level.  Adding these since we can replace the
-// native WebSocket and we still want people to be able to access them
-ReconnectingResendingWebSocket.CONNECTING = ReconnectingWebSocket.CONNECTING = WebSocket.CONNECTING;
-ReconnectingResendingWebSocket.OPEN = ReconnectingWebSocket.OPEN = WebSocket.OPEN;
-ReconnectingResendingWebSocket.CLOSING = ReconnectingWebSocket.CLOSING = WebSocket.CLOSING;
-ReconnectingResendingWebSocket.CLOSED = ReconnectingWebSocket.CLOSED = WebSocket.CLOSED;
-
-
-function KeepAliveMixin() {}
-
-KeepAliveMixin.prototype.keepAlive = function(ms, msg) {
+ReconnectingWebSocket.prototype.keepAlive = function(ms, msg) {
   this.msg = msg
   
   this.keepAliveTimer = setInterval(function(){
-    if(this.readyState !== this.CLOSING &&
-      this.readyState !== this.CLOSED) {
+    if(this.underlyingWs.readyState !== WebSocket.CLOSING &&
+      this.underlyingWs.readyState !== WebSocket.CLOSED) {
 
       log.info('keep-alive',msg);
       
       this.send(msg);
-    }   
+    } else if ( this.underlyingWs.readyState === WebSocket.CLOSED ) {  
+      this.clearKeepAlive();
+    }
   }.bind(this),ms); 
 }
 
-KeepAliveMixin.prototype.clearKeepAlive = function(ms, msg) {
+ReconnectingWebSocket.prototype.clearKeepAlive = function(ms, msg) {
   clearInterval(this.keepAliveTimer);
 }
 
 module.exports.ReconnectingWebSocket = ReconnectingWebSocket;
 module.exports.ReconnectingResendingWebSocket = ReconnectingResendingWebSocket;
-module.exports.KeepAliveWebSocket = Object.mixin(ReconnectingWebSocket.prototype,KeepAliveMixin.prototype);
