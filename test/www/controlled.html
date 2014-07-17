@@ -33,6 +33,21 @@
       }
     });
 
+    QUnit.asyncTest('sending an object as a string', function(assert) {
+      expect(1);
+      var testWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
+      
+      testWs.onopen = function (){
+        testWs.send(JSON.stringify({type:"echo", echoThis:"thank god, an object"}));
+      }
+      testWs.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.type === "echo" && message.echoThis === "thank god, an object" ){
+          assert.ok(true, "message sent as an object");
+          QUnit.start();
+        }
+      }
+    });
     QUnit.asyncTest('reconnect controlled', function(assert) {
       expect(4);
       var testWs = new ReconnectingWebSocket("ws://localhost:8081/socket");
