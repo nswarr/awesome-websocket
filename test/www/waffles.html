@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+
+<html lang="en" ng-app='theApp'>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
+  <title>reconnecting websocket tests</title>
+  <script type="text/javascript">
+    window.debug = true;
+  </script>
+  <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/server_controller.js"> </script>
+  <script type="text/javascript" src="js/lodash.js"> </script>
+  <script type="text/javascript">
+    var Q = require('q');
+    var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
+    /*var controller = new SocketServerController(8080);
+
+    controller.connected.promise.then(function(){
+      controller.start(8090);
+      controller.start(8091);
+    });
+    */
+    var index = 0;
+    
+    var testWs = new HuntingWebSocket([
+      "ws://localhost:8090/socket",
+      "ws://localhost:8091/socket"
+    ]);
+    
+    
+    testWs.onmessage = function(message){ console.log("got " + message.data); };
+    setInterval( function() { testWs.send("{\"howdy" + index++ + "\":\"pants\"}"); }, 1000);
+  </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+</body>
+</html>
