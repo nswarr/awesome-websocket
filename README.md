@@ -186,6 +186,7 @@ you.
       "ws://localhost:8086/socket"
     ]);
     testWs.send("this message is AWESOME!");
+    testWs.send({thisIs: "an object"}); // YAY!
 </script>
 ```
 
