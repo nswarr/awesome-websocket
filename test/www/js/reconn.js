@@ -1973,13 +1973,13 @@ return Q;
 }).call(this,require("FWaASH"))
 },{"FWaASH":1}],"q":[function(require,module,exports){
 module.exports=require('qLuPo1');
-},{}],"ws-additions":[function(require,module,exports){
-module.exports=require('7SYo5N');
 },{}],"7SYo5N":[function(require,module,exports){
 module.exports.ReconnectingWebSocket = require("./src/reconnecting-websocket.litcoffee");
-module.exports.AwesomeWebSocket = require("./src/hunting-websocket.litcoffee");
+module.exports.AwesomeWebSocket = require("./src/awesome-websocket.litcoffee");
 
-},{"./src/hunting-websocket.litcoffee":6,"./src/reconnecting-websocket.litcoffee":7}],6:[function(require,module,exports){
+},{"./src/awesome-websocket.litcoffee":6,"./src/reconnecting-websocket.litcoffee":7}],"ws-additions":[function(require,module,exports){
+module.exports=require('7SYo5N');
+},{}],6:[function(require,module,exports){
 var AwesomeWebSocket, ReconnectingWebSocket, WebSocket, background;
 
 ReconnectingWebSocket = require('./reconnecting-websocket.litcoffee');
