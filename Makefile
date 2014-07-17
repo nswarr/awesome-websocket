@@ -1,6 +1,6 @@
 .PHONY: watch clean run-server
 
-watch:
+watch:	
 	cd test && $(MAKE) watch
 
 clean:

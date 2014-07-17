@@ -1,4 +1,5 @@
 log = require('simplog');
+require('object-mixin');
 
 /* This is the function that our implementations will use to send
  * it's out here because we want to use it differently in the various
@@ -177,5 +178,26 @@ ReconnectingResendingWebSocket.CLOSING = ReconnectingWebSocket.CLOSING = WebSock
 ReconnectingResendingWebSocket.CLOSED = ReconnectingWebSocket.CLOSED = WebSocket.CLOSED;
 
 
+function KeepAliveMixin() {}
+
+KeepAliveMixin.prototype.keepAlive = function(ms, msg) {
+  this.msg = msg
+  
+  this.keepAliveTimer = setInterval(function(){
+    if(this.readyState !== this.CLOSING &&
+      this.readyState !== this.CLOSED) {
+
+      log.info('keep-alive',msg);
+      
+      this.send(msg);
+    }   
+  }.bind(this),ms); 
+}
+
+KeepAliveMixin.prototype.clearKeepAlive = function(ms, msg) {
+  clearInterval(this.keepAliveTimer);
+}
+
 module.exports.ReconnectingWebSocket = ReconnectingWebSocket;
 module.exports.ReconnectingResendingWebSocket = ReconnectingResendingWebSocket;
+module.exports.KeepAliveWebSocket = Object.mixin(ReconnectingWebSocket.prototype,KeepAliveMixin.prototype);

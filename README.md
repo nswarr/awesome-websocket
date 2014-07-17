@@ -219,3 +219,20 @@ would be valuable, so he's a little more basic.
     testWs.send("this message is AWESOME!");
 </script>
 ```
+
+Proxies have fun with Websockets.  Nginx in particular has a great default that will
+kill the connection if it is idle for too long. So you can opt to have Websocket
+send pings to your server every so often.
+
+```html
+<script src="js/reconn.js"></script>
+<script>
+  require("ws-additions");
+  
+  var ws = new WebSocket("ws://localhost:8080/socket")
+  ws.onopen = function() {
+    ws.keepAlive(60 * 1000, "ping!");
+  }
+
+</script>
+```

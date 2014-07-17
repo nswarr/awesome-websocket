@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+
+<html lang="en" ng-app='theApp'>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
+  <title>keep-alive tests</title>
+  <script src="//code.jquery.com/qunit/qunit-1.14.0.js"></script>
+  <script type="text/javascript">
+    window.debug = true;
+  </script>
+  <script type="text/javascript" src="js/reconn.js"> </script>
+  <script type="text/javascript" src="js/lodash.js"> </script>
+  <script type="text/javascript">
+    require("ws-additions");    
+
+    QUnit.asyncTest('keep alive should send a ping every n ms', function(assert) {
+      expect(10);
+      var count = 0;
+      var ws = new WebSocket("ws://localhost:8080/socket")
+    
+      ws.onmessage = function(message){
+        var m = JSON.parse(message.data);
+        
+        if (m.type !== "connected"){          
+
+          assert.ok(m.type === "pong", 'received message');
+          count++;
+        }
+
+        if (count == 10) {
+          ws.clearKeepAlive();
+          QUnit.start();
+          return;
+        }            
+      };
+      
+      ws.onopen = function() {
+        ws.keepAlive(100,"ping");
+      } 
+
+    });
+   
+  </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+</body>
+</html>
