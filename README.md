@@ -28,6 +28,10 @@ isn't connected when you call 'send'.
 * Hunting - given a list of hosts, connect to them and send messages to which
 ever one is available, switching to another if the 'active' connection becomes
 unavailable.  Dumb-as-dirt client side fail over.
+* KeepAlive - You've gotta have your server do some work for this one, but
+it will allow you to set up a message that will be periodically sent back to
+the server (to which the server should respond) to keep your connection up
+and healthy.
 
 ### ASSumptions
 It turns out we can make some assumptions in this whole process that make development
