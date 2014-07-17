@@ -2671,7 +2671,7 @@ var HuntingWebSocket, ReconnectingWebSocket,
 ReconnectingWebSocket = require('./reconnecting-websocket.js').ReconnectingWebSocket;
 
 HuntingWebSocket = (function() {
-  function HuntingWebSocket(urls) {
+  function HuntingWebSocket(urls, config) {
     var openAtAll, socket, url, _i, _len, _ref;
     this.urls = urls;
     this.processPendingMessages = __bind(this.processPendingMessages, this);
@@ -2699,6 +2699,9 @@ HuntingWebSocket = (function() {
       })(this);
       socket.onopen = (function(_this) {
         return function(evt) {
+          if (config != null ? config.keepAlive : void 0) {
+            socket.keepAlive(config.keepAliveInterval || 1000, config.keepAlive);
+          }
           if (!openAtAll) {
             openAtAll = true;
             _this.currSocket = socket;

@@ -15,8 +15,9 @@
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
     var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
+    var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
 
-    QUnit.asyncTest('reconnect controlled', function(assert) {
+    QUnit.asyncTest('keep alive on ReconnectingWebSocket', function(assert) {
       expect(4);
       var testWs = new ReconnectingWebSocket("ws://localhost:8080/socket");
       testWs.keepAlive(100, JSON.stringify({type:"echo", echoThis:"ka"}));
@@ -33,9 +34,27 @@
           shutHerDown();
         }
       }
-
-
     });
+    QUnit.asyncTest('keep alive on HuntingWebSocket', function(assert) {
+      expect(4);
+      var testWs = new HuntingWebSocket(["ws://localhost:8080/socket"],
+        {keepAliveInterval: 100, keepAlive: JSON.stringify({type:"echo", echoThis:"ka"})}
+      );
+      var shutHerDown = _.after(4, function(){
+        QUnit.start();
+        testWs.close();
+      });
+
+      testWs.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.echoThis === "ka" ){
+          assert.equal("ka", message.echoThis, "keep alive message");
+          shutHerDown();
+        }
+      }
+    });
+
+
 
   </script>
 </head>

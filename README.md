@@ -190,7 +190,8 @@ send pings to your server every so often.
 <script>
   require("ws-additions");
   
-  var ws = new WebSocket("ws://localhost:8080/socket")
+  var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
+  var ws = new ReconnectingWebSocket("ws://localhost:8080/socket")
   ws.onopen = function() {
     ws.keepAlive(60 * 1000, "ping!");
   }
