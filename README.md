@@ -40,9 +40,6 @@ use this package.
 * If you're using these it's because you want the websocket to do some useful
 things for you, so you don't have to do them yourself, thus you're willing to
 give up some of the 'raw' WebSocket interface elements.
-* If you're using the ReconnectingAndResendingWebSocket you don't need access
-to the full interface of the ReconnectingWebSocket (specifically `onreconnect`
-and `ondatanotsent`).
 
 ### You sure it works?
 
@@ -59,9 +56,8 @@ make watch
 Once you've done that successfully you should find a test pages at 
   * `http://localhost:8080/index.html`
   * `http://localhost:8080/hunting.html`
-  * `http://localhost:8080/controlled.html`
-  * `http://localhost:8080/controlled-resending.html`
-  * `http://localhost:8080/controlled-keepalive.html`
+  * `http://localhost:8080/reconnecting.html`
+  * `http://localhost:8080/keepalive.html`
 A bunch of these tests blow up the server ( by design ) so it's hard to get them
 all to run at the same time ( hence the multiple pages ).
 
@@ -120,10 +116,6 @@ interface HuntingWebSocket : EventTarget {
   void keepAlive(int timeoutMs, Object message)
 ```
 
-You can consume the functionality in a couple ways, either by explicit
-creation of one of these 'enhanced WebSockets' or by replacing the native
-WebSocket implementation with the one of your choosing.
-
 First of all, you'll to get the sucker into a format usable by your browser.
 'round here we like browserify.
 
@@ -143,14 +135,7 @@ Then in an HTML page somewhere above js/reconn.js
   var ws = new ReconnectingWebSocket("ws://localhost:8080/socket");
 </script>
 ```
--- or --
-```html
-<script src="js/reconn.js"></script>
-<script>
-  var ReconnectingResendingWebSocket = require("ws-additions").ReconnectingResendingWebSocket;
-  var ws = new ReconnectingResendingWebSocket("ws://localhost:8080/socket");
-</script>
-```
+
 With that, your `ws` will handle reconnecting for you in the event that the 
 server at `ws://localhost:8080/socket` disappears.
 

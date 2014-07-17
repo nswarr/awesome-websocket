@@ -1980,7 +1980,7 @@ module.exports.HuntingWebSocket = require("./src/hunting-websocket.litcoffee");
 },{"./src/hunting-websocket.litcoffee":6,"./src/reconnecting-websocket.litcoffee":7}],"ws-additions":[function(require,module,exports){
 module.exports=require('7SYo5N');
 },{}],6:[function(require,module,exports){
-var HuntingWebsocket, ReconnectingWebSocket, WebSocket, background;
+var HuntingWebSocket, ReconnectingWebSocket, WebSocket, background;
 
 ReconnectingWebSocket = require('./reconnecting-websocket.litcoffee');
 
@@ -1988,8 +1988,8 @@ WebSocket = window.WebSocket;
 
 background = window.requestAnimationFrame || setTimeout;
 
-HuntingWebsocket = (function() {
-  function HuntingWebsocket(urls) {
+HuntingWebSocket = (function() {
+  function HuntingWebSocket(urls) {
     var openAtAll, sendloop, socket, url, _i, _len, _ref;
     this.urls = urls;
     openAtAll = false;
@@ -2048,11 +2048,11 @@ HuntingWebsocket = (function() {
     background(sendloop);
   }
 
-  HuntingWebsocket.prototype.send = function(data) {
+  HuntingWebSocket.prototype.send = function(data) {
     return this.messageQueue.unshift(data);
   };
 
-  HuntingWebsocket.prototype.keepAlive = function(timeoutMs, message) {
+  HuntingWebSocket.prototype.keepAlive = function(timeoutMs, message) {
     var socket, _i, _len, _ref, _results;
     _ref = this.sockets;
     _results = [];
@@ -2063,7 +2063,7 @@ HuntingWebsocket = (function() {
     return _results;
   };
 
-  HuntingWebsocket.prototype.close = function() {
+  HuntingWebSocket.prototype.close = function() {
     var socket, _i, _len, _ref;
     _ref = this.sockets;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -2073,19 +2073,19 @@ HuntingWebsocket = (function() {
     return this.onclose();
   };
 
-  HuntingWebsocket.prototype.onopen = function(event) {};
+  HuntingWebSocket.prototype.onopen = function(event) {};
 
-  HuntingWebsocket.prototype.onclose = function(event) {};
+  HuntingWebSocket.prototype.onclose = function(event) {};
 
-  HuntingWebsocket.prototype.onmessage = function(event) {};
+  HuntingWebSocket.prototype.onmessage = function(event) {};
 
-  HuntingWebsocket.prototype.onerror = function(event) {};
+  HuntingWebSocket.prototype.onerror = function(event) {};
 
-  return HuntingWebsocket;
+  return HuntingWebSocket;
 
 })();
 
-module.exports = HuntingWebsocket;
+module.exports = HuntingWebSocket;
 
 
 },{"./reconnecting-websocket.litcoffee":7}],7:[function(require,module,exports){

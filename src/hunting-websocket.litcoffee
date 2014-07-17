@@ -24,7 +24,7 @@ that is the only time the socket has activity to 'know' it switched servers.
     background = window.requestAnimationFrame or setTimeout
 
 
-    class HuntingWebsocket
+    class HuntingWebSocket
       constructor: (@urls) ->
         openAtAll = false
         @lastSocket = undefined
@@ -116,4 +116,4 @@ the debugger.
 
 Publish this object for browserify.
 
-    module.exports = HuntingWebsocket
+    module.exports = HuntingWebSocket
