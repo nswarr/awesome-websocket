@@ -29,8 +29,8 @@ This is the connection retry system. Keep trying at every opportunity.
 
       reconnect: () ->
         background =>
-          @reconnect()
           if not @forceclose
+            @reconnect()
             if @readyState isnt WebSocket.OPEN
               if Date.now() > @reconnectAfter
                 @connect()

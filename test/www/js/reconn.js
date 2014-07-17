@@ -2109,8 +2109,8 @@ ReconnectingWebSocket = (function() {
   ReconnectingWebSocket.prototype.reconnect = function() {
     return background((function(_this) {
       return function() {
-        _this.reconnect();
         if (!_this.forceclose) {
+          _this.reconnect();
           if (_this.readyState !== WebSocket.OPEN) {
             if (Date.now() > _this.reconnectAfter) {
               return _this.connect();
