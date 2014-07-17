@@ -4,9 +4,9 @@
 <html lang="en" ng-app='theApp'>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.14.0.css">
+  <link rel="stylesheet" href="css/qunit.css">
   <title>reconnecting websocket tests</title>
-  <script src="//code.jquery.com/qunit/qunit-1.14.0.js"></script>
+  <script src="js/qunit.js"></script>
   <script type="text/javascript">
     window.debug = true;
   </script>
@@ -18,7 +18,22 @@
     var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
     var controllingWs = new SocketServerController(8080);
 
-    /*
+    QUnit.asyncTest('sending an object as a string', function(assert) {
+      expect(1);
+      var testWs = new HuntingWebSocket(["ws://localhost:8080/socket"]);
+      
+      testWs.onopen = function (){
+        testWs.send(JSON.stringify({type:"echo", echoThis:"thank god, an object"}));
+      }
+      testWs.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.type === "echo" && message.echoThis === "thank god, an object" ){
+          assert.ok(true, "message sent as an object");
+          QUnit.start();
+        }
+      }
+    });
+
     QUnit.asyncTest('sending an object', function(assert) {
       expect(1);
       var testWs = new HuntingWebSocket(["ws://localhost:8080/socket"]);
@@ -34,14 +49,16 @@
         }
       }
     });
-*/
+
     QUnit.asyncTest('message to dead server goes to next', function(assert) {
-      expect(2);
+      expect(3);
       var serverOne, serverTwo;
       var testWs = new HuntingWebSocket([
         "ws://localhost:8085/socket",
         "ws://localhost:8086/socket"
       ]);
+      var gotMessageOneFrom;
+      var gotMessageTwoFrom;
       var gotMessageOne = Q.defer();
       var gotMessageTwo = Q.defer();
 
@@ -49,19 +66,12 @@
         var message = JSON.parse(message.data);
         if ( message.type === "echo" && message.echoThis === "message one"){
           gotMessageOne.resolve();
+          gotMessageOneFrom = message.serverPort;
         } else if ( message.type === "echo" && message.echoThis === "message two"){
           gotMessageTwo.resolve();
-        }
-      }
-      // actual sending could take some number of tries... we just want to 
-      // make sure it comes through here
-      assertMessageTwoContents = _.once(function(data){
-        assert.equal("message two", data.echoThis, "message not sent");
-      });
-      testWs.ondatanotsent = function(evt) {
-        data = JSON.parse(evt.data);
-        if ( data.echoThis === "message two" ){
-          assertMessageTwoContents(data);
+          gotMessageTwoFrom = message.serverPort;
+          assert.equal("message two", message.echoThis, "message not sent");
+          assert.notEqual(gotMessageOneFrom, gotMessageTwoFrom, "message sources");
         }
       }
 

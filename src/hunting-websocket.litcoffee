@@ -6,6 +6,10 @@ OK -- so this socket, on send, will roll through all connected sockets, and the
 first one that does a successful transport wins. All connected sockets are
 possible sources for incoming messages.
 
+Oh -- and this is a *client side* WebSocket, and is set up to work
+with [Browserify](http://browserify.org/). Client side matters since it initiates
+the WebSocket connection, so is the only side in a place to reconnect.
+
 If you explicitly call `close()`, then this socket will really close, otherwise
 it will work to automatically reconnect `onerror` and `onclose` from the
 underlying WebSocket.
@@ -15,16 +19,20 @@ underlying WebSocket.
 This is fired when the active server changes, this will be after a `send` as
 that is the only time the socket has activity to 'know' it switched servers.
 
-    ReconnectingWebSocket = require('./reconnecting-websocket.js').ReconnectingWebSocket
+    ReconnectingWebSocket = require('./reconnecting-websocket.litcoffee')
+    WebSocket = window.WebSocket
+    background = window.requestAnimationFrame or setTimeout
 
-    class HuntingWebSocket
+
+    class HuntingWebsocket
       constructor: (@urls) ->
         openAtAll = false
-        @currSocket = undefined
-        @huntIndex = 0
-        @pendingMessages = []
+        @lastSocket = undefined
         @sockets = []
-        @closed = false
+        @messageQueue = []
+
+All the urls are reconnecting sockets, these will connect themselves.
+
         for url in @urls
           socket = new ReconnectingWebSocket(url)
           @sockets.push socket
@@ -40,40 +48,47 @@ to hookup each time we reopen.
           socket.onopen = (evt) =>
             if not openAtAll
               openAtAll = true
-              @currSocket = socket
               @onopen evt
-            @onconnectionopen url
-          socket.onreconnect = (evt) =>
-            @onreconnect evt
-            
 
-If there was a problem sending this message, let's try another socket
+        @forceclose = false
 
-          socket.ondatanotsent = (evt) =>
-            @pendingMessages.push evt.data
-            if ++@huntIndex >= @sockets.length
-              @huntIndex = 0
-            @currSocket = @sockets[@huntIndex]
-            @ondatanotsent evt
+Here is the magic, in the background we try very hard to send message
+out to the connected servers, and only take a message off the queue if
+at least the client side of the socket thinks the deed is done.
 
-      send: (data) =>
-        if data
-          @pendingMessages.push data
-        @processPendingMessages()
+        sendloop = =>
 
-      processPendingMessages: () =>
-        return if @scheduled or @closed
-        processMessages = () =>
-          while message = @pendingMessages.shift()
-            @send(message)
-        @scheduled = setInterval processMessages, 500
+Do this first, on purpose. Our buddy `send` below will throw an
+un-catch-able exception, so there wouldn't be that much opportunity
+toward the end of this function.
 
-Setup keep alive on our underlying sockets.  Yup, on each one regardless of
-which one(s) are current, you know so they'll all be good if we have to switch
+          background sendloop
+          if @messageQueue.length
 
-      keepAlive: (intervalInMs, message) =>
-        for socket in @sockets
-          socket.keepAlive intervalInMs, message
+This is a very simple form of sticky preference for the last socket that worked.
+And if not treat the array of sockets as a ring buffer.
+
+            if @lastSocket
+              trySocket = @lastSocket
+              @lastSocket = null
+            else
+              trySocket = @sockets.pop()
+              @sockets.unshift trySocket
+
+            if trySocket.readyState is WebSocket.OPEN
+              data = @messageQueue[@messageQueue.length-1]
+              trySocket.send(data)
+              @lastSocket = trySocket
+              @messageQueue.pop()
+
+Start pumping messages.
+
+        background sendloop
+
+Sending just queues up a message to go out to the server.
+
+      send: (data) ->
+        @messageQueue.unshift data
 
 Close all the sockets.
 
@@ -86,14 +101,10 @@ Empty shims for the event handlers. These are just here for discovery via
 the debugger.
 
       onopen: (event) ->
-      onreconnect: (event) ->
       onclose: (event) ->
       onmessage: (event) ->
       onerror: (event) ->
-      onconnectionopen: (event) ->
-      ondatanotsent: (event) ->
-      onsentto: (event) ->
 
 Publish this object for browserify.
 
-    module.exports = HuntingWebSocket
+    module.exports = HuntingWebsocket
