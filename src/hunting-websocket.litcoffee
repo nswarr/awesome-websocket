@@ -73,10 +73,12 @@ If there was a problem sending this message, let's try another socket
           @scheduled = undefined
         @scheduled = setTimeout processMessages, 500
 
+Setup keep alive on our underlying sockets.  Yup, on each one regardless of
+which one(s) are current, you know so they'll all be good if we have to switch
+
       keepAlive: (intervalInMs, message) =>
         for socket in @sockets
           socket.keepAlive intervalInMs, message
-
 
 Close all the sockets.
 

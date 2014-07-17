@@ -38,8 +38,9 @@ It turns out we can make some assumptions in this whole process that make develo
 a little easier, but may change the way you interact with WebSockets when you 
 use this package.
 
-* If you're using the ReconnectingWebSocket, you dont really need access to the
-full w3c defined WebSocket interface.
+* If you're using these it's because you want the websocket to do some useful
+things for you, so you don't have to do them yourself, thus you're willing to
+give up some of the 'raw' WebSocket interface elements.
 * If you're using the ReconnectingAndResendingWebSocket you don't need access
 to the full interface of the ReconnectingWebSocket (specifically `onreconnect`
 and `ondatanotsent`).
