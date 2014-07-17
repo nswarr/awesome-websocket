@@ -1,6 +1,6 @@
 {
   "name": "ws-additions",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Helpful additional functionality for the vanilla WebSocket.",
   "keywords": [
     "WebSocket",
