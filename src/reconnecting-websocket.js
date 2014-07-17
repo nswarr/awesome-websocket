@@ -58,10 +58,12 @@ function ReconnectingWebSocket(url, protocols){
     // exponential backoff on delay, capped at a wait of 1024 ms
     var delay = reconnectAttempts++ > 9 ? 1024 : Math.pow(2, reconnectAttempts);
     readyState = RECONNECTING;
+    log.debug("really reconnecting ", delay);
     setTimeout(connect, delay);
   }.bind(this);
 
   var connect = function() {
+    log.info("connecting....");
     readyState = WebSocket.CONNECTING;
     // an attempt to avoid get extraneous events
     // and allow the old socket to be GCd
@@ -139,6 +141,7 @@ function ReconnectingResendingWebSocket(url){
     unsentMessages.push(e.data);
   }.bind(this);
   var onreconnect = function(e) { 
+    log.debug("reconnected, sending any unsent messages");
     while (unsentMessages.length != 0){
       var message = unsentMessages.shift();
       this.send(message);
@@ -156,6 +159,7 @@ function ReconnectingResendingWebSocket(url){
   // handlers are still in place, otherwise we'll let them know but still try 
   // and send as normal ( maybe the change is intentional )
   this.send = function()  {
+    log.debug("sending");
     if ( onreconnect != this.onreconnect || ondatanotsent != this.ondatanotsent ){
       log.error("onreconnect or ondatanotsent have been reassigned, this could break resending!");
     }

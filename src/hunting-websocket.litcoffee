@@ -56,22 +56,19 @@ If there was a problem sending this message, let's try another socket
             @currSocket = @sockets[@huntIndex]
             @ondatanotsent evt
 
-      send: (data) ->
+      send: (data) =>
         if data
           if @currSocket
-            senttoMessageData =
-              url: @currSocket.underlyingWs.url
-              data: data
-            @onsentto(new MessageEvent('onsentto', data: senttoMessageData))
             @currSocket.send data
           else
             @pendingMessages.push data
         @processPendingMessages()
 
-      processPendingMessages: () ->
+      processPendingMessages: () =>
         return if @scheduled or @closed
         processMessages = () =>
-          while message = @pendingMessages.shift()
+          myMessages = @pendingMessages.slice(0)
+          while message = myMessages.shift()
             @send(message)
           @scheduled = undefined
         @scheduled = setTimeout processMessages, 500

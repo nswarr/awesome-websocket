@@ -2665,7 +2665,8 @@ module.exports=require('7SYo5N');
 
 }).call(this,require("FWaASH"))
 },{"FWaASH":2,"util":4}],10:[function(require,module,exports){
-var HuntingWebSocket, ReconnectingWebSocket;
+var HuntingWebSocket, ReconnectingWebSocket,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 ReconnectingWebSocket = require('./reconnecting-websocket.js').ReconnectingWebSocket;
 
@@ -2673,6 +2674,8 @@ HuntingWebSocket = (function() {
   function HuntingWebSocket(urls) {
     var openAtAll, socket, url, _i, _len, _ref;
     this.urls = urls;
+    this.processPendingMessages = __bind(this.processPendingMessages, this);
+    this.send = __bind(this.send, this);
     openAtAll = false;
     this.currSocket = void 0;
     this.huntIndex = 0;
@@ -2723,16 +2726,8 @@ HuntingWebSocket = (function() {
   }
 
   HuntingWebSocket.prototype.send = function(data) {
-    var senttoMessageData;
     if (data) {
       if (this.currSocket) {
-        senttoMessageData = {
-          url: this.currSocket.underlyingWs.url,
-          data: data
-        };
-        this.onsentto(new MessageEvent('onsentto', {
-          data: senttoMessageData
-        }));
         this.currSocket.send(data);
       } else {
         this.pendingMessages.push(data);
@@ -2748,8 +2743,9 @@ HuntingWebSocket = (function() {
     }
     processMessages = (function(_this) {
       return function() {
-        var message;
-        while (message = _this.pendingMessages.shift()) {
+        var message, myMessages;
+        myMessages = _this.pendingMessages.slice(0);
+        while (message = myMessages.shift()) {
           _this.send(message);
         }
         return _this.scheduled = void 0;
@@ -2852,10 +2848,12 @@ function ReconnectingWebSocket(url, protocols){
     // exponential backoff on delay, capped at a wait of 1024 ms
     var delay = reconnectAttempts++ > 9 ? 1024 : Math.pow(2, reconnectAttempts);
     readyState = RECONNECTING;
+    log.debug("really reconnecting ", delay);
     setTimeout(connect, delay);
   }.bind(this);
 
   var connect = function() {
+    log.info("connecting....");
     readyState = WebSocket.CONNECTING;
     // an attempt to avoid get extraneous events
     // and allow the old socket to be GCd
@@ -2933,6 +2931,7 @@ function ReconnectingResendingWebSocket(url){
     unsentMessages.push(e.data);
   }.bind(this);
   var onreconnect = function(e) { 
+    log.debug("reconnected, sending any unsent messages");
     while (unsentMessages.length != 0){
       var message = unsentMessages.shift();
       this.send(message);
@@ -2950,6 +2949,7 @@ function ReconnectingResendingWebSocket(url){
   // handlers are still in place, otherwise we'll let them know but still try 
   // and send as normal ( maybe the change is intentional )
   this.send = function()  {
+    log.debug("sending");
     if ( onreconnect != this.onreconnect || ondatanotsent != this.ondatanotsent ){
       log.error("onreconnect or ondatanotsent have been reassigned, this could break resending!");
     }
