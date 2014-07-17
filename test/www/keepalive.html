@@ -16,7 +16,7 @@
   <script type="text/javascript">
     var ReconnectingResendingWebSocket = require("ws-additions").ReconnectingResendingWebSocket;
     var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
-    var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
+    var AwesomeWebSocket = require("ws-additions").AwesomeWebSocket;
 
     QUnit.asyncTest('keep alive on ReconnectingWebSocket', function(assert) {
       expect(4);
@@ -40,9 +40,9 @@
     // this is a stub, for this to actually be useful we need to throw the
     // controller in here and have the hunter talk to multiple sockets so we can
     // make sure that we're getting response for each socket
-    QUnit.asyncTest('keep alive on HuntingWebSocket multiple sockets', function(assert) {
+    QUnit.asyncTest('keep alive on AwesomeWebSocket multiple sockets', function(assert) {
       expect(4);
-      var testWs = new HuntingWebSocket(["ws://localhost:8080/socket", "ws://localhost:8080/socket"]);
+      var testWs = new AwesomeWebSocket(["ws://localhost:8080/socket", "ws://localhost:8080/socket"]);
       testWs.keepAlive(100, JSON.stringify({type:"echo", echoThis:"ka"}));
       var shutHerDown = _.after(4, function(){
         QUnit.start();
@@ -58,9 +58,9 @@
       }
     });
 
-    QUnit.asyncTest('keep alive on HuntingWebSocket', function(assert) {
+    QUnit.asyncTest('keep alive on AwesomeWebSocket', function(assert) {
       expect(4);
-      var testWs = new HuntingWebSocket(["ws://localhost:8080/socket"]);
+      var testWs = new AwesomeWebSocket(["ws://localhost:8080/socket"]);
       testWs.keepAlive(100, JSON.stringify({type:"echo", echoThis:"ka"}));
       var shutHerDown = _.after(4, function(){
         QUnit.start();

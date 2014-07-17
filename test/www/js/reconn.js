@@ -1973,14 +1973,14 @@ return Q;
 }).call(this,require("FWaASH"))
 },{"FWaASH":1}],"q":[function(require,module,exports){
 module.exports=require('qLuPo1');
+},{}],"ws-additions":[function(require,module,exports){
+module.exports=require('7SYo5N');
 },{}],"7SYo5N":[function(require,module,exports){
 module.exports.ReconnectingWebSocket = require("./src/reconnecting-websocket.litcoffee");
-module.exports.HuntingWebSocket = require("./src/hunting-websocket.litcoffee");
+module.exports.AwesomeWebSocket = require("./src/hunting-websocket.litcoffee");
 
-},{"./src/hunting-websocket.litcoffee":6,"./src/reconnecting-websocket.litcoffee":7}],"ws-additions":[function(require,module,exports){
-module.exports=require('7SYo5N');
-},{}],6:[function(require,module,exports){
-var HuntingWebSocket, ReconnectingWebSocket, WebSocket, background;
+},{"./src/hunting-websocket.litcoffee":6,"./src/reconnecting-websocket.litcoffee":7}],6:[function(require,module,exports){
+var AwesomeWebSocket, ReconnectingWebSocket, WebSocket, background;
 
 ReconnectingWebSocket = require('./reconnecting-websocket.litcoffee');
 
@@ -1988,8 +1988,8 @@ WebSocket = window.WebSocket;
 
 background = window.requestAnimationFrame || setTimeout;
 
-HuntingWebSocket = (function() {
-  function HuntingWebSocket(urls) {
+AwesomeWebSocket = (function() {
+  function AwesomeWebSocket(urls) {
     var openAtAll, sendloop, socket, url, _i, _len, _ref;
     this.urls = urls;
     openAtAll = false;
@@ -2048,11 +2048,11 @@ HuntingWebSocket = (function() {
     background(sendloop);
   }
 
-  HuntingWebSocket.prototype.send = function(data) {
+  AwesomeWebSocket.prototype.send = function(data) {
     return this.messageQueue.unshift(data);
   };
 
-  HuntingWebSocket.prototype.keepAlive = function(timeoutMs, message) {
+  AwesomeWebSocket.prototype.keepAlive = function(timeoutMs, message) {
     var socket, _i, _len, _ref, _results;
     _ref = this.sockets;
     _results = [];
@@ -2063,7 +2063,7 @@ HuntingWebSocket = (function() {
     return _results;
   };
 
-  HuntingWebSocket.prototype.close = function() {
+  AwesomeWebSocket.prototype.close = function() {
     var socket, _i, _len, _ref;
     _ref = this.sockets;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -2073,19 +2073,19 @@ HuntingWebSocket = (function() {
     return this.onclose();
   };
 
-  HuntingWebSocket.prototype.onopen = function(event) {};
+  AwesomeWebSocket.prototype.onopen = function(event) {};
 
-  HuntingWebSocket.prototype.onclose = function(event) {};
+  AwesomeWebSocket.prototype.onclose = function(event) {};
 
-  HuntingWebSocket.prototype.onmessage = function(event) {};
+  AwesomeWebSocket.prototype.onmessage = function(event) {};
 
-  HuntingWebSocket.prototype.onerror = function(event) {};
+  AwesomeWebSocket.prototype.onerror = function(event) {};
 
-  return HuntingWebSocket;
+  return AwesomeWebSocket;
 
 })();
 
-module.exports = HuntingWebSocket;
+module.exports = AwesomeWebSocket;
 
 
 },{"./reconnecting-websocket.litcoffee":7}],7:[function(require,module,exports){

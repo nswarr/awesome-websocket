@@ -14,7 +14,7 @@
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
     var Q = require('q');
-    var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
+    var AwesomeWebSocket = require("ws-additions").AwesomeWebSocket;
     /*var controller = new SocketServerController(8080);
 
     controller.connected.promise.then(function(){
@@ -24,7 +24,7 @@
     */
     var index = 0;
     
-    var testWs = new HuntingWebSocket([
+    var testWs = new AwesomeWebSocket([
       "ws://localhost:8090/socket",
       "ws://localhost:8091/socket"
     ]);

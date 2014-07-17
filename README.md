@@ -92,11 +92,11 @@ interface ReconnectingWebSocket : EventTarget {
   void keepAlive(int timeoutMs, Object message)
 ```
 
-#### What's a HuntingWebSocket look like?
+#### What's a AwesomeWebSocket look like?
 
 ```
 [Constructor([DOMString url] | DOMString url)]
-interface HuntingWebSocket : EventTarget {
+interface AwesomeWebSocket : EventTarget {
   attribute WebSocket currSocket;
 
   // networking
@@ -146,8 +146,8 @@ you.
 ```html
 <script src="js/reconn.js"></script>
 <script>
-    var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
-    var testWs = new HuntingWebSocket([
+    var AwesomeWebSocket = require("ws-additions").AwesomeWebSocket;
+    var testWs = new AwesomeWebSocket([
       "ws://localhost:8085/socket",
       "ws://localhost:8086/socket"
     ]);
