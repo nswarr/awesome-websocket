@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "ws": "0.4.31",
-    "object-mixin": "^0.2.1",
     "simplog": "0.1.0",
     "lodash": "^2.4.1"
   },
