@@ -14,8 +14,28 @@
   <script type="text/javascript" src="js/server_controller.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
+    var ReconnectingResendingWebSocket = require("ws-additions").ReconnectingResendingWebSocket;
     var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
     var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
+
+    QUnit.asyncTest('keep alive on ReconnectingResendingWebSocket', function(assert) {
+      expect(4);
+      var testWs = new ReconnectingResendingWebSocket("ws://localhost:8080/socket");
+      testWs.keepAlive(100, JSON.stringify({type:"echo", echoThis:"ka"}));
+
+      var shutHerDown = _.after(4, function(){
+        QUnit.start();
+        testWs.close();
+      });
+
+      testWs.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.echoThis === "ka" ){
+          assert.equal("ka", message.echoThis, "keep alive message");
+          shutHerDown();
+        }
+      }
+    });
 
     QUnit.asyncTest('keep alive on ReconnectingWebSocket', function(assert) {
       expect(4);
@@ -35,11 +55,32 @@
         }
       }
     });
+
+    // this is a stub, for this to actually be useful we need to throw the
+    // controller in here and have the hunter talk to multiple sockets so we can
+    // make sure that we're getting response for each socket
+    QUnit.asyncTest('keep alive on HuntingWebSocket multiple sockets', function(assert) {
+      expect(4);
+      var testWs = new HuntingWebSocket(["ws://localhost:8080/socket", "ws://localhost:8080/socket"]);
+      testWs.keepAlive(100, JSON.stringify({type:"echo", echoThis:"ka"}));
+      var shutHerDown = _.after(4, function(){
+        QUnit.start();
+        testWs.close();
+      });
+
+      testWs.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.echoThis === "ka" ){
+          assert.equal("ka", message.echoThis, "keep alive message");
+          shutHerDown();
+        }
+      }
+    });
+
     QUnit.asyncTest('keep alive on HuntingWebSocket', function(assert) {
       expect(4);
-      var testWs = new HuntingWebSocket(["ws://localhost:8080/socket"],
-        {keepAliveInterval: 100, keepAlive: JSON.stringify({type:"echo", echoThis:"ka"})}
-      );
+      var testWs = new HuntingWebSocket(["ws://localhost:8080/socket"]);
+      testWs.keepAlive(100, JSON.stringify({type:"echo", echoThis:"ka"}));
       var shutHerDown = _.after(4, function(){
         QUnit.start();
         testWs.close();

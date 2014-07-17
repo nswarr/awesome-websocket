@@ -18,7 +18,7 @@ that is the only time the socket has activity to 'know' it switched servers.
     ReconnectingWebSocket = require('./reconnecting-websocket.js').ReconnectingWebSocket
 
     class HuntingWebSocket
-      constructor: (@urls, config) ->
+      constructor: (@urls) ->
         openAtAll = false
         @currSocket = undefined
         @huntIndex = 0
@@ -38,8 +38,6 @@ to hookup each time we reopen.
           socket.onerror = (err) =>
             @onerror err
           socket.onopen = (evt) =>
-            if config?.keepAlive
-              socket.keepAlive( config.keepAliveInterval || 1000, config.keepAlive )
             if not openAtAll
               openAtAll = true
               @currSocket = socket
@@ -74,6 +72,10 @@ If there was a problem sending this message, let's try another socket
             @send(message)
           @scheduled = undefined
         @scheduled = setTimeout processMessages, 500
+
+      keepAlive: (intervalInMs, message) =>
+        for socket in @sockets
+          socket.keepAlive intervalInMs, message
 
 
 Close all the sockets.

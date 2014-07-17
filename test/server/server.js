@@ -71,6 +71,7 @@ wss.on('connection', function(ws) {
         allMyChildren.push(myChild);
         sendMessage( { type: "started", childPort: action.port, port: action.port, pid: myChild.pid });
       } else if ( action.type === "echo" ){
+        action.serverPort = serverPort;
         sendMessage(action);
       }
     }

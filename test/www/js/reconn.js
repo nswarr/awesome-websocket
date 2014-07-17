@@ -2671,9 +2671,10 @@ var HuntingWebSocket, ReconnectingWebSocket,
 ReconnectingWebSocket = require('./reconnecting-websocket.js').ReconnectingWebSocket;
 
 HuntingWebSocket = (function() {
-  function HuntingWebSocket(urls, config) {
+  function HuntingWebSocket(urls) {
     var openAtAll, socket, url, _i, _len, _ref;
     this.urls = urls;
+    this.keepAlive = __bind(this.keepAlive, this);
     this.processPendingMessages = __bind(this.processPendingMessages, this);
     this.send = __bind(this.send, this);
     openAtAll = false;
@@ -2699,9 +2700,6 @@ HuntingWebSocket = (function() {
       })(this);
       socket.onopen = (function(_this) {
         return function(evt) {
-          if (config != null ? config.keepAlive : void 0) {
-            socket.keepAlive(config.keepAliveInterval || 1000, config.keepAlive);
-          }
           if (!openAtAll) {
             openAtAll = true;
             _this.currSocket = socket;
@@ -2755,6 +2753,17 @@ HuntingWebSocket = (function() {
       };
     })(this);
     return this.scheduled = setTimeout(processMessages, 500);
+  };
+
+  HuntingWebSocket.prototype.keepAlive = function(intervalInMs, message) {
+    var socket, _i, _len, _ref, _results;
+    _ref = this.sockets;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      socket = _ref[_i];
+      _results.push(socket.keepAlive(intervalInMs, message));
+    }
+    return _results;
   };
 
   HuntingWebSocket.prototype.close = function() {
