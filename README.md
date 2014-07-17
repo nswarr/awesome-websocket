@@ -32,6 +32,8 @@ unavailable.  Dumb-as-dirt client side fail over.
 it will allow you to set up a message that will be periodically sent back to
 the server (to which the server should respond) to keep your connection up
 and healthy.
+* Sending Objects - really, if you send an object you'd probably just like
+it to get JSON serialized... so... that's what these do.
 
 ### ASSumptions
 It turns out we can make some assumptions in this whole process that make development
