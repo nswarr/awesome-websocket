@@ -71,12 +71,6 @@ to you.
 interface ReconnectingWebSocket : EventTarget {
   attribute WebSocket underlyingWs;
 
-  // ready state
-  const unsigned short CONNECTING = 0;
-  const unsigned short OPEN = 1;
-  const unsigned short CLOSING = 2;
-  const unsigned short CLOSED = 3;
-
   // networking
           attribute EventHandler onopen;
           attribute EventHandler onerror;
@@ -98,12 +92,6 @@ interface ReconnectingWebSocket : EventTarget {
 [Constructor(DOMString url)]
 interface ReconnectingResendingWebSocket : EventTarget {
   attribute WebSocket underlyingWs;
-
-  // ready state
-  const unsigned short CONNECTING = 0;
-  const unsigned short OPEN = 1;
-  const unsigned short CLOSING = 2;
-  const unsigned short CLOSED = 3;
 
   // networking
           attribute EventHandler onopen;
@@ -177,36 +165,9 @@ Then in an HTML page somewhere above js/reconn.js
 With that, your `ws` will handle reconnecting for you in the event that the 
 server at `ws://localhost:8080/socket` disappears.
 
-You can also opt to have it replace the native WebSocket, a polyfill if you will.
-
-```html
-<script src="js/reconn.js"></script>
-<script>
-  require("ws-additions").MakeWebSocketReconnecting();
-  // now all your calls to new WebSocket will return 
-  // ReconnectingWebSockets!
-  var ws = new WebSocket("ws://localhost:8080/socket")
-  // woah, that was really dumb I wish to never create another 
-  // ReconnectingWebSocket when calling new WebSocket
-  UnMakeWebSocketReconnecting();
-</script>
-```
--- or --
-```html
-<script src="js/reconn.js"></script>
-<script>
-  require("ws-additions").MakeWebSocketReconnectingAndResending();
-  // now all your calls to new WebSocket will return 
-  // ReconnectingResendingWebSockets!
-  var ws = new WebSocket("ws://localhost:8080/socket")
-  // woah, that was really dumb I wish to never create another 
-  // ReconnectingResendingWebSocket when calling new WebSocket
-  UnMakeWebSocketReconnectingAndResending();
-</script>
-```
-
-The hunting websocket is so unlike anything else, it seems unlikely that a polyfill
-would be valuable, so he's a little more basic.
+For hunting, the only real difference is that you need to provide a list of
+servers to connect to, if any of them choose to vanish... it'll handle that for
+you.
 
 ```html
 <script src="js/reconn.js"></script>
