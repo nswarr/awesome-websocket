@@ -18,7 +18,11 @@ function sender(data){
     // all about how we failed via onsendfailed
     try {
       log.debug("sending to(%s) : %j", this.underlyingWs.url, data);
-      this.underlyingWs.send(data);
+      if ( typeof(data) === "object" ){
+        this.underlyingWs.send(JSON.stringify(data));
+      } else {
+        this.underlyingWs.send(data);
+      }
       return true; //sent
     } catch (error) {
       log.error(error);

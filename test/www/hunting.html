@@ -18,6 +18,22 @@
     var HuntingWebSocket = require("ws-additions").HuntingWebSocket;
     var controllingWs = new SocketServerController(8080);
 
+    QUnit.asyncTest('sending an object', function(assert) {
+      expect(1);
+      var testWs = new HuntingWebSocket(["ws://localhost:8080/socket"]);
+      
+      testWs.onopen = function (){
+        testWs.send({type:"echo", echoThis:"thank god, an object"});
+      }
+      testWs.onmessage = function(message){
+        message = JSON.parse(message.data);
+        if ( message.type === "echo" && message.echoThis === "thank god, an object" ){
+          assert.ok(true, "message sent as an object");
+          QUnit.start();
+        }
+      }
+    });
+
     QUnit.asyncTest('message to dead server goes to next', function(assert) {
       expect(2);
       var serverOne, serverTwo;
