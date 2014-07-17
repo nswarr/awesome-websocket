@@ -64,6 +64,7 @@ Once you've done that successfully you should find a test pages at
   * `http://localhost:8080/hunting.html`
   * `http://localhost:8080/controlled.html`
   * `http://localhost:8080/controlled-resending.html`
+  * `http://localhost:8080/controlled-keepalive.html`
 A bunch of these tests blow up the server ( by design ) so it's hard to get them
 all to run at the same time ( hence the multiple pages ).
 
