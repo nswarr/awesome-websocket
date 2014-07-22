@@ -13,7 +13,9 @@ function SocketServerController(port){
     } }.bind(this);
   this.send = this.sendMessage;
 
+  this.onmessage = function(evt) {}
   ws.onmessage = function(message){
+    origMessage = message;
     message = JSON.parse(message.data);
     if ( message.type === "started" ){
       this.servers[message.childPort].started.resolve();
@@ -22,7 +24,9 @@ function SocketServerController(port){
       delete this.servers[message.childPort]
     } else if ( message.type === "connected" ){
       this.connected.resolve();
-    } }.bind(this);
+    }
+    this.onmessage(origMessage);
+   }.bind(this);
 
   // kills the controlling server
   this.die = function() { this.sendMessage("die") }.bind(this);

@@ -1,11 +1,13 @@
 {
-  "name": "ws-additions",
+  "name": "awesome-websocket",
   "version": "0.0.13",
-  "description": "Helpful additional functionality for the vanilla WebSocket.",
+  "description": "A WebSocket, with the extra awesome of client failover and autoreconnect",
   "keywords": [
     "WebSocket",
     "reconnect",
     "reconnecting",
+    "queueing",
+    "failover",
     "resend"
   ],
   "main": "index.js",
@@ -24,12 +26,16 @@
     {
       "name": "David Hayes",
       "url": "https://drhayes.io"
+    },
+    {
+      "name": "Will Ballard",
+      "url": "https://github.com/wballard"
     }
   ],
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/igroff/ws-additions.git"
+    "url": "https://github.com/glg/awesome-websocket.git"
   },
   "dependencies": {
     "ws": "0.4.31",
