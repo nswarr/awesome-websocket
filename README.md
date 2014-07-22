@@ -40,8 +40,8 @@ While the only place this currently has been tested is in Chrome and Safari
 (or doesn't) work.
 
 ```bash
-git clone https://github.com/igroff/ws-additions.git
-cd ws-additions/
+git clone https://github.com/glg/awesome-websocket.git
+cd awesome-websocket/
 make watch
 ```
 
@@ -114,8 +114,8 @@ First of all, you'll to get the sucker into a format usable by your browser.
 
 ```bash
 
-npm install ws-additions
-browserify -r ws-additions --outfile www/js/reconn.js
+npm install awesome-websocket
+browserify -r awesome-websocket --outfile www/js/reconn.js
 ```
 
 :shit: If you really want to, the most recent browserified version of this thing is down there in `test/www/js/reconn.js`
@@ -128,7 +128,7 @@ AwesomeWebSocket ( AwesomeWebSocket is way more awesome tho ).
 ```html
 <script src="js/reconn.js"></script>
 <script>
-  var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
+  var ReconnectingWebSocket = require("awesome-websocket").ReconnectingWebSocket;
   var ws = new ReconnectingWebSocket("ws://localhost:8080/socket");
   // now ws will reconnect in the event that the server busts, the only problem
   // is that you may lose any messages not sent to the server
@@ -145,7 +145,7 @@ you.
 ```html
 <script src="js/reconn.js"></script>
 <script>
-    var AwesomeWebSocket = require("ws-additions").AwesomeWebSocket;
+    var AwesomeWebSocket = require("awesome-websocket").AwesomeWebSocket;
     var testWs = new AwesomeWebSocket([
       "ws://localhost:8085/socket",
       "ws://localhost:8086/socket"
@@ -161,7 +161,7 @@ In that case, just give it a single url as a string.
 ```html
 <script src="js/reconn.js"></script>
 <script>
-    var AwesomeWebSocket = require("ws-additions").AwesomeWebSocket;
+    var AwesomeWebSocket = require("awesome-websocket").AwesomeWebSocket;
     var testWs = new AwesomeWebSocket("ws://localhost:8085/socket");
     testWs.send("this message is AWESOME!");
     testWs.send({thisIs: "an object"}); // YAY!
@@ -177,7 +177,7 @@ that your server will respond to.
 ```html
 <script src="js/reconn.js"></script>
 <script>
-  var AwesomeWebSocket = require("ws-additions").AwesomeWebSocket;
+  var AwesomeWebSocket = require("awesome-websocket").AwesomeWebSocket;
   var ws = new AwesomeWebSocket("ws://localhost:8080/socket")
   ws.onopen = function() {
     // this sets up the keep alive
