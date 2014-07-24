@@ -20,8 +20,8 @@ This is fired when the active server changes, this will be after a `send` as
 that is the only time the socket has activity to 'know' it switched servers.
 
     ReconnectingWebSocket = require('./reconnecting-websocket.litcoffee')
-    WebSocket = window.WebSocket
-    background = window.requestAnimationFrame or setTimeout
+    WebSocket = window?.WebSocket || require('ws')
+    background = window?.requestAnimationFrame or setTimeout
 
 
     class AwesomeWebSocket

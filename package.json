@@ -1,6 +1,6 @@
 {
   "name": "awesome-websocket",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "A WebSocket, with the extra awesome of client failover and autoreconnect",
   "keywords": [
     "WebSocket",
@@ -30,6 +30,10 @@
     {
       "name": "Will Ballard",
       "url": "https://github.com/wballard"
+    },
+    {
+       "name": "Nick Swarr",
+       "url": "https://github.com/nswarr"
     }
   ],
   "license": "ISC",
