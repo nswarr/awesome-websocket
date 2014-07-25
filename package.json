@@ -1,6 +1,6 @@
 {
   "name": "awesome-websocket",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "A WebSocket, with the extra awesome of client failover and autoreconnect",
   "keywords": [
     "WebSocket",
@@ -32,8 +32,8 @@
       "url": "https://github.com/wballard"
     },
     {
-       "name": "Nick Swarr",
-       "url": "https://github.com/nswarr"
+      "name": "Nick Swarr",
+      "url": "https://github.com/nswarr"
     }
   ],
   "license": "ISC",
@@ -42,10 +42,11 @@
     "url": "https://github.com/glg/awesome-websocket.git"
   },
   "dependencies": {
-    "ws": "0.4.31",
-    "simplog": "0.1.0",
+    "coffee-script": "^1.7.1",
+    "coffeeify": "0.6.0",
     "lodash": "^2.4.1",
-    "coffeeify": "0.6.0"
+    "simplog": "0.1.0",
+    "ws": "0.4.31"
   },
   "browserify": {
     "transform": [
