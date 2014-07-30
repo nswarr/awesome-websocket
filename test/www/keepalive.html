@@ -14,9 +14,6 @@
   <script type="text/javascript" src="js/server_controller.js"> </script>
   <script type="text/javascript" src="js/lodash.js"> </script>
   <script type="text/javascript">
-    var ReconnectingResendingWebSocket = require("ws-additions").ReconnectingResendingWebSocket;
-    var ReconnectingWebSocket = require("ws-additions").ReconnectingWebSocket;
-    var AwesomeWebSocket = require("ws-additions").AwesomeWebSocket;
 
     QUnit.asyncTest('keep alive on ReconnectingWebSocket', function(assert) {
       expect(4);

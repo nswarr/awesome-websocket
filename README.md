@@ -115,7 +115,7 @@ First of all, you'll to get the sucker into a format usable by your browser.
 ```bash
 
 npm install awesome-websocket
-browserify -r awesome-websocket --outfile www/js/reconn.js
+browserify -r awesome-websocket -i ws -i coffee-script/register --outfile www/js/reconn.js 
 ```
 
 :shit: If you really want to, the most recent browserified version of this thing is down there in `test/www/js/reconn.js`
