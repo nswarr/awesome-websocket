@@ -115,7 +115,7 @@ First of all, you'll to get the sucker into a format usable by your browser.
 ```bash
 
 npm install awesome-websocket
-browserify -r awesome-websocket -i ws -i coffee-script/register --outfile www/js/reconn.js 
+browserify -r awesome-websocket --outfile www/js/reconn.js 
 ```
 
 :shit: If you really want to, the most recent browserified version of this thing is down there in `test/www/js/reconn.js`
@@ -185,4 +185,14 @@ that your server will respond to.
   }
 
 </script>
+```
+
+#### What about server-to-server?
+
+Your socketing can, of course, go server to server.  It needs a little extra machinery so you have to require **"awesome-websocket/s2s"** like so,
+
+```js
+    var AwesomeWebSocket = require("awesome-websocket/s2s").AwesomeWebSocket;
+    var socket = new AwesomeWebSocket("ws://localhost:8085/socket");
+    socket.send("I just sent this to another server!");
 ```
